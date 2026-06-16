@@ -167,7 +167,7 @@ export const adminRetryPayout = createServerFn({ method: "POST" })
       .from("payout_attempts")
       .update({
         status: ok ? "submitted" : "failed",
-        raw_response: result as unknown as Record<string, unknown>,
+        raw_response: result as never,
         conversation_id: result.ConversationID ?? null,
         originator_conversation_id: result.OriginatorConversationID ?? null,
       })

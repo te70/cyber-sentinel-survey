@@ -144,10 +144,10 @@ export const saveSection = createServerFn({ method: "POST" })
     const session = verifySession(token);
     if (!session) return { ok: false as const, reason: "no_session" };
 
-    const update: Record<string, unknown> = { [data.section]: data.payload };
+    const update = { [data.section]: data.payload as never };
     const { error } = await supabaseAdmin
       .from("responses")
-      .update(update)
+      .update(update as never)
       .eq("id", session.rid)
       .eq("completed", false);
     if (error) {
@@ -241,7 +241,7 @@ export const completeSurvey = createServerFn({ method: "POST" })
         .update({
           conversation_id: result.ConversationID ?? null,
           originator_conversation_id: result.OriginatorConversationID ?? null,
-          raw_response: result as unknown as Record<string, unknown>,
+          raw_response: result as never,
           status: ok ? "submitted" : "failed",
         })
         .eq("id", attempt?.id ?? "");
@@ -265,7 +265,7 @@ export const completeSurvey = createServerFn({ method: "POST" })
       console.error("B2C error", msg);
       await supabaseAdmin
         .from("payout_attempts")
-        .update({ status: "failed", raw_response: { error: msg } })
+        .update({ status: "failed", raw_response: { error: msg } as never })
         .eq("id", attempt?.id ?? "");
       await supabaseAdmin
         .from("responses")
