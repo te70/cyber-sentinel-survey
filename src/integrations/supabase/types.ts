@@ -14,16 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payout_attempts: {
+        Row: {
+          amount: number
+          conversation_id: string | null
+          created_at: string
+          id: string
+          originator_conversation_id: string | null
+          raw_request: Json | null
+          raw_response: Json | null
+          response_id: string
+          result_payload: Json | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          originator_conversation_id?: string | null
+          raw_request?: Json | null
+          raw_response?: Json | null
+          response_id: string
+          result_payload?: Json | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          originator_conversation_id?: string | null
+          raw_request?: Json | null
+          raw_response?: Json | null
+          response_id?: string
+          result_payload?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_attempts_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responses: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          consented_at: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          mpesa_last_error: string | null
+          mpesa_payout_status: string
+          mpesa_transaction_id: string | null
+          phone_encrypted: string | null
+          phone_hash: string
+          screened_in: boolean
+          screening: Json | null
+          section_a: Json | null
+          section_b: Json | null
+          section_c: Json | null
+          section_d: Json | null
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          consented_at?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          mpesa_last_error?: string | null
+          mpesa_payout_status?: string
+          mpesa_transaction_id?: string | null
+          phone_encrypted?: string | null
+          phone_hash: string
+          screened_in?: boolean
+          screening?: Json | null
+          section_a?: Json | null
+          section_b?: Json | null
+          section_c?: Json | null
+          section_d?: Json | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          consented_at?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          mpesa_last_error?: string | null
+          mpesa_payout_status?: string
+          mpesa_transaction_id?: string | null
+          phone_encrypted?: string | null
+          phone_hash?: string
+          screened_in?: boolean
+          screening?: Json | null
+          section_a?: Json | null
+          section_b?: Json | null
+          section_c?: Json | null
+          section_d?: Json | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_completed_count: { Args: never; Returns: number }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +290,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
