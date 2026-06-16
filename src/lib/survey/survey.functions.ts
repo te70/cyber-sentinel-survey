@@ -193,7 +193,7 @@ export const completeSurvey = createServerFn({ method: "POST" })
     await supabaseAdmin
       .from("responses")
       .update({
-        section_d: data.section_d,
+        section_d: data.section_d as never,
         completed: true,
         completed_at: new Date().toISOString(),
       })
