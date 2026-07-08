@@ -11,10 +11,28 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SurveyRouteImport } from './routes/survey'
 import { Route as ScreeningRouteImport } from './routes/screening'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as CompleteRouteImport } from './routes/complete'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SurveysAdminIndexRouteImport } from './routes/surveys-admin/index'
+import { Route as ToolsTaxRouteImport } from './routes/tools/tax'
+import { Route as ToolsInvoiceRouteImport } from './routes/tools/invoice'
+import { Route as ToolsContractsRouteImport } from './routes/tools/contracts'
+import { Route as ToolsComplianceRouteImport } from './routes/tools/compliance'
+import { Route as SurveysSectionDRouteImport } from './routes/surveys/section-d'
+import { Route as SurveysSectionCRouteImport } from './routes/surveys/section-c'
+import { Route as SurveysSectionBRouteImport } from './routes/surveys/section-b'
+import { Route as SurveysSectionARouteImport } from './routes/surveys/section-a'
+import { Route as SurveysReportRouteImport } from './routes/surveys/report'
+import { Route as SurveysOtpRouteImport } from './routes/surveys/otp'
+import { Route as SurveysEligibilityRouteImport } from './routes/surveys/eligibility'
+import { Route as SurveysDashboardRouteImport } from './routes/surveys/dashboard'
+import { Route as SurveysCompleteRouteImport } from './routes/surveys/complete'
+import { Route as SurveysAdminQueueRouteImport } from './routes/surveys-admin/queue'
+import { Route as SurveysAdminPayoutsRouteImport } from './routes/surveys-admin/payouts'
+import { Route as SurveysAdminExportRouteImport } from './routes/surveys-admin/export'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicDarajaResultRouteImport } from './routes/api/public/daraja/result'
 
@@ -26,6 +44,11 @@ const SurveyRoute = SurveyRouteImport.update({
 const ScreeningRoute = ScreeningRouteImport.update({
   id: '/screening',
   path: '/screening',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompleteRoute = CompleteRouteImport.update({
@@ -47,6 +70,91 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SurveysAdminIndexRoute = SurveysAdminIndexRouteImport.update({
+  id: '/surveys-admin/',
+  path: '/surveys-admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsTaxRoute = ToolsTaxRouteImport.update({
+  id: '/tools/tax',
+  path: '/tools/tax',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsInvoiceRoute = ToolsInvoiceRouteImport.update({
+  id: '/tools/invoice',
+  path: '/tools/invoice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsContractsRoute = ToolsContractsRouteImport.update({
+  id: '/tools/contracts',
+  path: '/tools/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsComplianceRoute = ToolsComplianceRouteImport.update({
+  id: '/tools/compliance',
+  path: '/tools/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysSectionDRoute = SurveysSectionDRouteImport.update({
+  id: '/surveys/section-d',
+  path: '/surveys/section-d',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysSectionCRoute = SurveysSectionCRouteImport.update({
+  id: '/surveys/section-c',
+  path: '/surveys/section-c',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysSectionBRoute = SurveysSectionBRouteImport.update({
+  id: '/surveys/section-b',
+  path: '/surveys/section-b',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysSectionARoute = SurveysSectionARouteImport.update({
+  id: '/surveys/section-a',
+  path: '/surveys/section-a',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysReportRoute = SurveysReportRouteImport.update({
+  id: '/surveys/report',
+  path: '/surveys/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysOtpRoute = SurveysOtpRouteImport.update({
+  id: '/surveys/otp',
+  path: '/surveys/otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysEligibilityRoute = SurveysEligibilityRouteImport.update({
+  id: '/surveys/eligibility',
+  path: '/surveys/eligibility',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysDashboardRoute = SurveysDashboardRouteImport.update({
+  id: '/surveys/dashboard',
+  path: '/surveys/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysCompleteRoute = SurveysCompleteRouteImport.update({
+  id: '/surveys/complete',
+  path: '/surveys/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysAdminQueueRoute = SurveysAdminQueueRouteImport.update({
+  id: '/surveys-admin/queue',
+  path: '/surveys-admin/queue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysAdminPayoutsRoute = SurveysAdminPayoutsRouteImport.update({
+  id: '/surveys-admin/payouts',
+  path: '/surveys-admin/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysAdminExportRoute = SurveysAdminExportRouteImport.update({
+  id: '/surveys-admin/export',
+  path: '/surveys-admin/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -62,18 +170,54 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/complete': typeof CompleteRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/screening': typeof ScreeningRoute
   '/survey': typeof SurveyRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/surveys-admin/export': typeof SurveysAdminExportRoute
+  '/surveys-admin/payouts': typeof SurveysAdminPayoutsRoute
+  '/surveys-admin/queue': typeof SurveysAdminQueueRoute
+  '/surveys/complete': typeof SurveysCompleteRoute
+  '/surveys/dashboard': typeof SurveysDashboardRoute
+  '/surveys/eligibility': typeof SurveysEligibilityRoute
+  '/surveys/otp': typeof SurveysOtpRoute
+  '/surveys/report': typeof SurveysReportRoute
+  '/surveys/section-a': typeof SurveysSectionARoute
+  '/surveys/section-b': typeof SurveysSectionBRoute
+  '/surveys/section-c': typeof SurveysSectionCRoute
+  '/surveys/section-d': typeof SurveysSectionDRoute
+  '/tools/compliance': typeof ToolsComplianceRoute
+  '/tools/contracts': typeof ToolsContractsRoute
+  '/tools/invoice': typeof ToolsInvoiceRoute
+  '/tools/tax': typeof ToolsTaxRoute
+  '/surveys-admin/': typeof SurveysAdminIndexRoute
   '/api/public/daraja/result': typeof ApiPublicDarajaResultRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/complete': typeof CompleteRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/screening': typeof ScreeningRoute
   '/survey': typeof SurveyRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/surveys-admin/export': typeof SurveysAdminExportRoute
+  '/surveys-admin/payouts': typeof SurveysAdminPayoutsRoute
+  '/surveys-admin/queue': typeof SurveysAdminQueueRoute
+  '/surveys/complete': typeof SurveysCompleteRoute
+  '/surveys/dashboard': typeof SurveysDashboardRoute
+  '/surveys/eligibility': typeof SurveysEligibilityRoute
+  '/surveys/otp': typeof SurveysOtpRoute
+  '/surveys/report': typeof SurveysReportRoute
+  '/surveys/section-a': typeof SurveysSectionARoute
+  '/surveys/section-b': typeof SurveysSectionBRoute
+  '/surveys/section-c': typeof SurveysSectionCRoute
+  '/surveys/section-d': typeof SurveysSectionDRoute
+  '/tools/compliance': typeof ToolsComplianceRoute
+  '/tools/contracts': typeof ToolsContractsRoute
+  '/tools/invoice': typeof ToolsInvoiceRoute
+  '/tools/tax': typeof ToolsTaxRoute
+  '/surveys-admin': typeof SurveysAdminIndexRoute
   '/api/public/daraja/result': typeof ApiPublicDarajaResultRoute
 }
 export interface FileRoutesById {
@@ -82,9 +226,27 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/complete': typeof CompleteRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/screening': typeof ScreeningRoute
   '/survey': typeof SurveyRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/surveys-admin/export': typeof SurveysAdminExportRoute
+  '/surveys-admin/payouts': typeof SurveysAdminPayoutsRoute
+  '/surveys-admin/queue': typeof SurveysAdminQueueRoute
+  '/surveys/complete': typeof SurveysCompleteRoute
+  '/surveys/dashboard': typeof SurveysDashboardRoute
+  '/surveys/eligibility': typeof SurveysEligibilityRoute
+  '/surveys/otp': typeof SurveysOtpRoute
+  '/surveys/report': typeof SurveysReportRoute
+  '/surveys/section-a': typeof SurveysSectionARoute
+  '/surveys/section-b': typeof SurveysSectionBRoute
+  '/surveys/section-c': typeof SurveysSectionCRoute
+  '/surveys/section-d': typeof SurveysSectionDRoute
+  '/tools/compliance': typeof ToolsComplianceRoute
+  '/tools/contracts': typeof ToolsContractsRoute
+  '/tools/invoice': typeof ToolsInvoiceRoute
+  '/tools/tax': typeof ToolsTaxRoute
+  '/surveys-admin/': typeof SurveysAdminIndexRoute
   '/api/public/daraja/result': typeof ApiPublicDarajaResultRoute
 }
 export interface FileRouteTypes {
@@ -93,18 +255,54 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/complete'
+    | '/how-it-works'
     | '/screening'
     | '/survey'
     | '/admin'
+    | '/surveys-admin/export'
+    | '/surveys-admin/payouts'
+    | '/surveys-admin/queue'
+    | '/surveys/complete'
+    | '/surveys/dashboard'
+    | '/surveys/eligibility'
+    | '/surveys/otp'
+    | '/surveys/report'
+    | '/surveys/section-a'
+    | '/surveys/section-b'
+    | '/surveys/section-c'
+    | '/surveys/section-d'
+    | '/tools/compliance'
+    | '/tools/contracts'
+    | '/tools/invoice'
+    | '/tools/tax'
+    | '/surveys-admin/'
     | '/api/public/daraja/result'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/complete'
+    | '/how-it-works'
     | '/screening'
     | '/survey'
     | '/admin'
+    | '/surveys-admin/export'
+    | '/surveys-admin/payouts'
+    | '/surveys-admin/queue'
+    | '/surveys/complete'
+    | '/surveys/dashboard'
+    | '/surveys/eligibility'
+    | '/surveys/otp'
+    | '/surveys/report'
+    | '/surveys/section-a'
+    | '/surveys/section-b'
+    | '/surveys/section-c'
+    | '/surveys/section-d'
+    | '/tools/compliance'
+    | '/tools/contracts'
+    | '/tools/invoice'
+    | '/tools/tax'
+    | '/surveys-admin'
     | '/api/public/daraja/result'
   id:
     | '__root__'
@@ -112,9 +310,27 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/complete'
+    | '/how-it-works'
     | '/screening'
     | '/survey'
     | '/_authenticated/admin'
+    | '/surveys-admin/export'
+    | '/surveys-admin/payouts'
+    | '/surveys-admin/queue'
+    | '/surveys/complete'
+    | '/surveys/dashboard'
+    | '/surveys/eligibility'
+    | '/surveys/otp'
+    | '/surveys/report'
+    | '/surveys/section-a'
+    | '/surveys/section-b'
+    | '/surveys/section-c'
+    | '/surveys/section-d'
+    | '/tools/compliance'
+    | '/tools/contracts'
+    | '/tools/invoice'
+    | '/tools/tax'
+    | '/surveys-admin/'
     | '/api/public/daraja/result'
   fileRoutesById: FileRoutesById
 }
@@ -123,8 +339,26 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CompleteRoute: typeof CompleteRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   ScreeningRoute: typeof ScreeningRoute
   SurveyRoute: typeof SurveyRoute
+  SurveysAdminExportRoute: typeof SurveysAdminExportRoute
+  SurveysAdminPayoutsRoute: typeof SurveysAdminPayoutsRoute
+  SurveysAdminQueueRoute: typeof SurveysAdminQueueRoute
+  SurveysCompleteRoute: typeof SurveysCompleteRoute
+  SurveysDashboardRoute: typeof SurveysDashboardRoute
+  SurveysEligibilityRoute: typeof SurveysEligibilityRoute
+  SurveysOtpRoute: typeof SurveysOtpRoute
+  SurveysReportRoute: typeof SurveysReportRoute
+  SurveysSectionARoute: typeof SurveysSectionARoute
+  SurveysSectionBRoute: typeof SurveysSectionBRoute
+  SurveysSectionCRoute: typeof SurveysSectionCRoute
+  SurveysSectionDRoute: typeof SurveysSectionDRoute
+  ToolsComplianceRoute: typeof ToolsComplianceRoute
+  ToolsContractsRoute: typeof ToolsContractsRoute
+  ToolsInvoiceRoute: typeof ToolsInvoiceRoute
+  ToolsTaxRoute: typeof ToolsTaxRoute
+  SurveysAdminIndexRoute: typeof SurveysAdminIndexRoute
   ApiPublicDarajaResultRoute: typeof ApiPublicDarajaResultRoute
 }
 
@@ -142,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/screening'
       fullPath: '/screening'
       preLoaderRoute: typeof ScreeningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/complete': {
@@ -170,6 +411,125 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys-admin/': {
+      id: '/surveys-admin/'
+      path: '/surveys-admin'
+      fullPath: '/surveys-admin/'
+      preLoaderRoute: typeof SurveysAdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/tax': {
+      id: '/tools/tax'
+      path: '/tools/tax'
+      fullPath: '/tools/tax'
+      preLoaderRoute: typeof ToolsTaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/invoice': {
+      id: '/tools/invoice'
+      path: '/tools/invoice'
+      fullPath: '/tools/invoice'
+      preLoaderRoute: typeof ToolsInvoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/contracts': {
+      id: '/tools/contracts'
+      path: '/tools/contracts'
+      fullPath: '/tools/contracts'
+      preLoaderRoute: typeof ToolsContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/compliance': {
+      id: '/tools/compliance'
+      path: '/tools/compliance'
+      fullPath: '/tools/compliance'
+      preLoaderRoute: typeof ToolsComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/section-d': {
+      id: '/surveys/section-d'
+      path: '/surveys/section-d'
+      fullPath: '/surveys/section-d'
+      preLoaderRoute: typeof SurveysSectionDRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/section-c': {
+      id: '/surveys/section-c'
+      path: '/surveys/section-c'
+      fullPath: '/surveys/section-c'
+      preLoaderRoute: typeof SurveysSectionCRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/section-b': {
+      id: '/surveys/section-b'
+      path: '/surveys/section-b'
+      fullPath: '/surveys/section-b'
+      preLoaderRoute: typeof SurveysSectionBRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/section-a': {
+      id: '/surveys/section-a'
+      path: '/surveys/section-a'
+      fullPath: '/surveys/section-a'
+      preLoaderRoute: typeof SurveysSectionARouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/report': {
+      id: '/surveys/report'
+      path: '/surveys/report'
+      fullPath: '/surveys/report'
+      preLoaderRoute: typeof SurveysReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/otp': {
+      id: '/surveys/otp'
+      path: '/surveys/otp'
+      fullPath: '/surveys/otp'
+      preLoaderRoute: typeof SurveysOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/eligibility': {
+      id: '/surveys/eligibility'
+      path: '/surveys/eligibility'
+      fullPath: '/surveys/eligibility'
+      preLoaderRoute: typeof SurveysEligibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/dashboard': {
+      id: '/surveys/dashboard'
+      path: '/surveys/dashboard'
+      fullPath: '/surveys/dashboard'
+      preLoaderRoute: typeof SurveysDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/complete': {
+      id: '/surveys/complete'
+      path: '/surveys/complete'
+      fullPath: '/surveys/complete'
+      preLoaderRoute: typeof SurveysCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys-admin/queue': {
+      id: '/surveys-admin/queue'
+      path: '/surveys-admin/queue'
+      fullPath: '/surveys-admin/queue'
+      preLoaderRoute: typeof SurveysAdminQueueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys-admin/payouts': {
+      id: '/surveys-admin/payouts'
+      path: '/surveys-admin/payouts'
+      fullPath: '/surveys-admin/payouts'
+      preLoaderRoute: typeof SurveysAdminPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys-admin/export': {
+      id: '/surveys-admin/export'
+      path: '/surveys-admin/export'
+      fullPath: '/surveys-admin/export'
+      preLoaderRoute: typeof SurveysAdminExportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -205,10 +565,38 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CompleteRoute: CompleteRoute,
+  HowItWorksRoute: HowItWorksRoute,
   ScreeningRoute: ScreeningRoute,
   SurveyRoute: SurveyRoute,
+  SurveysAdminExportRoute: SurveysAdminExportRoute,
+  SurveysAdminPayoutsRoute: SurveysAdminPayoutsRoute,
+  SurveysAdminQueueRoute: SurveysAdminQueueRoute,
+  SurveysCompleteRoute: SurveysCompleteRoute,
+  SurveysDashboardRoute: SurveysDashboardRoute,
+  SurveysEligibilityRoute: SurveysEligibilityRoute,
+  SurveysOtpRoute: SurveysOtpRoute,
+  SurveysReportRoute: SurveysReportRoute,
+  SurveysSectionARoute: SurveysSectionARoute,
+  SurveysSectionBRoute: SurveysSectionBRoute,
+  SurveysSectionCRoute: SurveysSectionCRoute,
+  SurveysSectionDRoute: SurveysSectionDRoute,
+  ToolsComplianceRoute: ToolsComplianceRoute,
+  ToolsContractsRoute: ToolsContractsRoute,
+  ToolsInvoiceRoute: ToolsInvoiceRoute,
+  ToolsTaxRoute: ToolsTaxRoute,
+  SurveysAdminIndexRoute: SurveysAdminIndexRoute,
   ApiPublicDarajaResultRoute: ApiPublicDarajaResultRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

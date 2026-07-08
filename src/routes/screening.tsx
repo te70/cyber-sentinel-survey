@@ -31,19 +31,41 @@ const ROLES = [
   "Operations Manager",
   "Other senior role with IT oversight",
 ];
+const AGE_GROUPS = ["18–24", "25–34", "35–44", "45–54", "55 or older"];
+const GENDERS = ["Male", "Female", "Non-binary / gender diverse", "Prefer not to say"];
+const EDUCATION_LEVELS = [
+  "Secondary school (KCSE or equivalent)",
+  "College diploma / certificate",
+  "Bachelor's degree",
+  "Master's degree",
+  "Doctorate (PhD)",
+  "Other",
+];
+const YEARS_IN_BUSINESS = [
+  "Less than 1 year",
+  "1–2 years",
+  "3–5 years",
+  "6–10 years",
+  "More than 10 years",
+];
 
 type FormState = {
   q1: "yes" | "no" | "";
   q2: string;
   q3: string;
   q4: "yes" | "no" | "";
+  // Demographics
+  age: string;
+  gender: string;
+  education: string;
+  yearsInBusiness: string;
   phone: string;
 };
 
 function Screening() {
   const navigate = useNavigate();
   const submit = useServerFn(submitScreening);
-  const [form, setForm] = useState<FormState>({ q1: "", q2: "", q3: "", q4: "", phone: "" });
+  const [form, setForm] = useState<FormState>({ q1: "", q2: "", q3: "", q4: "", age: "", gender: "", education: "", yearsInBusiness: "", phone: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverErr, setServerErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,6 +76,10 @@ function Screening() {
     if (!form.q2) e.q2 = "Select an option.";
     if (!form.q3) e.q3 = "Select an option.";
     if (!form.q4) e.q4 = "Please answer this question.";
+    if (!form.age) e.age = "Select an option.";
+    if (!form.gender) e.gender = "Select an option.";
+    if (!form.education) e.education = "Select an option.";
+    if (!form.yearsInBusiness) e.yearsInBusiness = "Select an option.";
     if (!PHONE_REGEX.test(form.phone)) e.phone = "Format: 07XXXXXXXX or 01XXXXXXXX (10 digits).";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -76,6 +102,12 @@ function Screening() {
         },
       });
       if (res.ok) {
+        localStorage.setItem("ts_screening_demographics", JSON.stringify({
+          age: form.age,
+          gender: form.gender,
+          education: form.education,
+          yearsInBusiness: form.yearsInBusiness,
+        }));
         navigate({ to: "/survey" });
       } else if (res.reason === "duplicate") {
         setServerErr(
@@ -203,6 +235,60 @@ function Screening() {
                 { value: "yes", label: "Yes" },
                 { value: "no", label: "No" },
               ]}
+            />
+          </FormBlock>
+
+          {/* Demographic separator */}
+          <div className="relative my-2">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-dashed" /></div>
+            <div className="relative flex justify-center">
+              <span className="bg-gradient-to-b from-background to-secondary px-3 text-xs font-medium text-muted-foreground">About you (for research purposes only)</span>
+            </div>
+          </div>
+
+          {/* Age */}
+          <FormBlock label="5. What is your age group?" error={errors.age}>
+            <RadioGroup
+              name="age"
+              value={form.age}
+              onChange={(v) => setForm({ ...form, age: v })}
+              options={AGE_GROUPS.map((a) => ({ value: a, label: a }))}
+            />
+          </FormBlock>
+
+          {/* Gender */}
+          <FormBlock label="6. What is your gender?" error={errors.gender}>
+            <RadioGroup
+              name="gender"
+              value={form.gender}
+              onChange={(v) => setForm({ ...form, gender: v })}
+              options={GENDERS.map((g) => ({ value: g, label: g }))}
+            />
+          </FormBlock>
+
+          {/* Education */}
+          <FormBlock label="7. What is your highest level of education?" error={errors.education}>
+            <div className="space-y-2">
+              {EDUCATION_LEVELS.map((opt) => (
+                <RadioRow
+                  key={opt}
+                  name="education"
+                  value={opt}
+                  checked={form.education === opt}
+                  onChange={() => setForm({ ...form, education: opt })}
+                  label={opt}
+                />
+              ))}
+            </div>
+          </FormBlock>
+
+          {/* Years in business */}
+          <FormBlock label="8. How long has your business been operating?" error={errors.yearsInBusiness}>
+            <RadioGroup
+              name="yearsInBusiness"
+              value={form.yearsInBusiness}
+              onChange={(v) => setForm({ ...form, yearsInBusiness: v })}
+              options={YEARS_IN_BUSINESS.map((y) => ({ value: y, label: y }))}
             />
           </FormBlock>
 

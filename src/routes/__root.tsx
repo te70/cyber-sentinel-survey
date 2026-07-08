@@ -77,20 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Cybersecurity Maturity Survey — USIU-A" },
+      { title: "Cybersecurity Maturity Survey — Tetrasec" },
       {
         name: "description",
         content:
-          "MSc research survey for Nairobi digital-services SMEs. 10-minute, anonymous, Ksh 100 M-Pesa reward.",
+          "Cybersecurity maturity survey for Nairobi digital-services SMEs. 10-minute, anonymous, Ksh 50 M-Pesa reward.",
       },
-      { name: "author", content: "Tevin Njenga, USIU-A" },
+      { name: "author", content: "Tetrasec Solutions" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap",
       },
       { rel: "stylesheet", href: appCss },
     ],

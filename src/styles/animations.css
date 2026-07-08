@@ -1,0 +1,33 @@
+/* ── Maturity score pulse ring ── */
+@keyframes ts-pulse-ring {
+  0%   { box-shadow: 0 0 0 0px  rgba(0, 191, 166, 0.40); }
+  50%  { box-shadow: 0 0 0 12px rgba(0, 191, 166, 0.00); }
+  100% { box-shadow: 0 0 0 0px  rgba(0, 191, 166, 0.00); }
+}
+
+.ts-score-ring {
+  animation: ts-pulse-ring 2.5s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-score-ring { animation: none; }
+}
+
+/* ── Skeleton loader ── */
+@keyframes ts-skeleton-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ts-skeleton {
+  background: linear-gradient(
+    90deg,
+    #D1E8E8 25%,
+    #EBF5F7 50%,
+    #D1E8E8 75%
+  );
+  background-size: 200% 100%;
+  animation: ts-skeleton-sweep 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}

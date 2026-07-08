@@ -58,10 +58,10 @@ function Complete() {
         </div>
 
         <a
-          href="mailto:njengat1@usiu.ac.ke"
+          href="mailto:info@tetrasec.co.ke"
           className="mt-6 inline-flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground"
         >
-          <Mail className="h-3.5 w-3.5" /> njengat1@usiu.ac.ke
+          <Mail className="h-3.5 w-3.5" /> info@tetrasec.co.ke
         </a>
 
         <div className="mt-6">

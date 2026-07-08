@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "./styles/animations.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -50,6 +51,35 @@
 
 :root {
   --radius: 0.625rem;
+
+  /* ── Tetrasec Solutions — brand tokens ── */
+  --ts-navy:           #1A2F42;
+  --ts-teal:           #00C9C8;
+  --ts-teal-dim:       #00A8A7;
+  --ts-teal-ghost:     #D0F5F5;
+  --ts-teal-pale:      #EBFAFA;
+  --ts-surface:        #EBFAFA;
+  --ts-surface-alt:    #F0FAFA;
+  --ts-card:           #FFFFFF;
+  --ts-border:         #C8E8E8;
+  --ts-border-strong:  #CBD5E1;
+  --ts-text-primary:   #1A2F42;
+  --ts-text-body:      #2D3748;
+  --ts-text-secondary: #718096;
+  --ts-text-nav:       #4A5568;
+  --ts-text-disabled:  #A0AEC0;
+  --ts-text-inverse:   #FFFFFF;
+  --ts-text-teal:      #00897B;
+  --ts-success:        #10B981;
+  --ts-warning:        #F59E0B;
+  --ts-error:          #EF4444;
+  --ts-info:           #3B82F6;
+  --ts-shadow-sm:      0 1px 3px rgba(13, 27, 42, 0.08);
+  --ts-shadow-md:      0 4px 12px rgba(13, 27, 42, 0.10);
+  --ts-shadow-lg:      0 8px 24px rgba(13, 27, 42, 0.12);
+  --ts-shadow-teal:    0 0 0 3px rgba(0, 201, 200, 0.25);
+  --ts-font-display:   'Space Grotesk', sans-serif;
+  --ts-font-body:      'DM Sans', sans-serif;
   /* USIU navy + electric green */
   --background: oklch(0.99 0.003 250);
   --foreground: oklch(0.21 0.06 264);
@@ -57,8 +87,8 @@
   --card-foreground: oklch(0.21 0.06 264);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.21 0.06 264);
-  /* Deep navy #0F2044 */
-  --primary: oklch(0.24 0.08 264);
+  /* Tetrasec navy #1A2F42 */
+  --primary: #1A2F42;
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.96 0.01 250);
   --secondary-foreground: oklch(0.24 0.08 264);

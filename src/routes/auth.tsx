@@ -63,7 +63,7 @@ function Auth() {
           </div>
           <div>
             <div className="text-sm font-semibold">Researcher access</div>
-            <div className="text-xs text-muted-foreground">USIU-A admin dashboard</div>
+            <div className="text-xs text-muted-foreground">Tetrasec admin dashboard</div>
           </div>
         </div>
 

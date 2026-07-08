@@ -1,9 +1,10 @@
-// Server functions for the survey flow. Client-safe to import (handlers stripped).
+// Server functions for the survey flow — localStorage bypass mode.
+// Supabase DB calls are removed; session cookie is still signed with
+// SURVEY_SESSION_SECRET so the flow is stateless-but-authenticated.
+// All survey answers are persisted client-side in localStorage.
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie, setCookie, deleteCookie, getRequestHeader } from "@tanstack/react-start/server";
+import { getCookie, setCookie, deleteCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { supabase as supabasePublic } from "@/integrations/supabase/client";
-
 import { PHONE_REGEX } from "./schema";
 
 const SESSION_COOKIE = "survey_session";
@@ -11,7 +12,7 @@ const SESSION_COOKIE = "survey_session";
 function setSessionCookie(token: string, maxAgeSec: number) {
   setCookie(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: true,
+    secure: false, // allow http in local dev
     sameSite: "lax",
     path: "/",
     maxAge: maxAgeSec,
@@ -20,12 +21,8 @@ function setSessionCookie(token: string, maxAgeSec: number) {
 
 // ---------- Public counter ----------
 export const getCompletedCount = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabasePublic.rpc("get_completed_count");
-  if (error) {
-    console.error("get_completed_count error", error);
-    return { count: 0 };
-  }
-  return { count: (data as number) ?? 0 };
+  // localStorage bypass — return 0 until Supabase is connected
+  return { count: 0 };
 });
 
 // ---------- Screening ----------
@@ -41,8 +38,7 @@ const ScreeningSchema = z.object({
 export const submitScreening = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ScreeningSchema.parse(d))
   .handler(async ({ data }) => {
-    const { hashPhone, signSession, SESSION_TTL_MS } = await import("./session.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { signSession, SESSION_TTL_MS, hashPhone } = await import("./session.server");
 
     if (!data.consent) return { ok: false as const, reason: "consent_required" };
     if (!data.q1_nairobi) return { ok: false as const, reason: "ineligible" };
@@ -50,77 +46,9 @@ export const submitScreening = createServerFn({ method: "POST" })
     if (data.q3_role === "NONE") return { ok: false as const, reason: "ineligible" };
     if (!data.q4_digital_platform) return { ok: false as const, reason: "ineligible" };
 
+    // Generate a local response ID — no DB insert
+    const responseId = crypto.randomUUID();
     const phoneHash = hashPhone(data.phone);
-
-    // Dedup: completed already?
-    const { data: completedRows } = await supabaseAdmin
-      .from("responses")
-      .select("id")
-      .eq("phone_hash", phoneHash)
-      .eq("completed", true)
-      .limit(1);
-    if (completedRows && completedRows.length > 0) {
-      return { ok: false as const, reason: "duplicate" };
-    }
-
-    // Resume an existing partial if there is exactly one.
-    const { data: partial } = await supabaseAdmin
-      .from("responses")
-      .select("id")
-      .eq("phone_hash", phoneHash)
-      .eq("completed", false)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    const userAgent = getRequestHeader("user-agent") ?? null;
-    const ipHeader =
-      getRequestHeader("cf-connecting-ip") ??
-      getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ??
-      null;
-
-    let responseId: string;
-    if (partial && partial.length > 0) {
-      responseId = partial[0].id as string;
-      await supabaseAdmin
-        .from("responses")
-        .update({
-          screened_in: true,
-          consented_at: new Date().toISOString(),
-          screening: {
-            q1_nairobi: data.q1_nairobi,
-            q2_business_type: data.q2_business_type,
-            q3_role: data.q3_role,
-            q4_digital_platform: data.q4_digital_platform,
-          },
-          ip_address: ipHeader,
-          user_agent: userAgent,
-        })
-        .eq("id", responseId);
-    } else {
-      const { data: inserted, error } = await supabaseAdmin
-        .from("responses")
-        .insert({
-          phone_hash: phoneHash,
-          phone_encrypted: data.phone, // stored only until payout; redact on completion if you want stronger privacy
-          screened_in: true,
-          consented_at: new Date().toISOString(),
-          screening: {
-            q1_nairobi: data.q1_nairobi,
-            q2_business_type: data.q2_business_type,
-            q3_role: data.q3_role,
-            q4_digital_platform: data.q4_digital_platform,
-          },
-          ip_address: ipHeader,
-          user_agent: userAgent,
-        })
-        .select("id")
-        .single();
-      if (error || !inserted) {
-        console.error("screening insert failed", error);
-        return { ok: false as const, reason: "server_error" };
-      }
-      responseId = inserted.id as string;
-    }
 
     const exp = Date.now() + SESSION_TTL_MS;
     const token = signSession({ rid: responseId, ph: phoneHash, exp });
@@ -137,143 +65,33 @@ const SaveSchema = z.object({
 
 export const saveSection = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SaveSchema.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data: _data }) => {
     const { verifySession } = await import("./session.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const token = getCookie(SESSION_COOKIE);
     const session = verifySession(token);
     if (!session) return { ok: false as const, reason: "no_session" };
 
-    const update = { [data.section]: data.payload as never };
-    const { error } = await supabaseAdmin
-      .from("responses")
-      .update(update as never)
-      .eq("id", session.rid)
-      .eq("completed", false);
-    if (error) {
-      console.error("saveSection error", error);
-      return { ok: false as const, reason: "server_error" };
-    }
+    // localStorage bypass — client stores data locally, server just confirms session is valid
     return { ok: true as const };
   });
 
-// ---------- Complete + payout ----------
+// ---------- Complete ----------
 export const completeSurvey = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z
-      .object({
-        section_d: z.record(z.string(), z.unknown()),
-      })
-      .parse(d),
+    z.object({ section_d: z.record(z.string(), z.unknown()) }).parse(d),
   )
-  .handler(async ({ data }) => {
-    const { verifySession, toMsisdn, maskPhone } = await import("./session.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { sendB2C } = await import("./daraja.server");
+  .handler(async ({ data: _data }) => {
+    const { verifySession } = await import("./session.server");
 
     const token = getCookie(SESSION_COOKIE);
     const session = verifySession(token);
     if (!session) return { ok: false as const, reason: "no_session" as const };
 
-    const { data: row, error: fetchErr } = await supabaseAdmin
-      .from("responses")
-      .select("id, phone_encrypted, completed, mpesa_payout_status")
-      .eq("id", session.rid)
-      .single();
-    if (fetchErr || !row) return { ok: false as const, reason: "not_found" as const };
-    if (row.completed && row.mpesa_payout_status === "sent") {
-      return {
-        ok: true as const,
-        masked: maskPhone(row.phone_encrypted ?? ""),
-        payoutStatus: "sent" as const,
-      };
-    }
+    deleteCookie(SESSION_COOKIE, { path: "/" });
 
-    // Mark completed
-    await supabaseAdmin
-      .from("responses")
-      .update({
-        section_d: data.section_d as never,
-        completed: true,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", session.rid);
-
-    // Build callback URL
-    const host =
-      getRequestHeader("x-forwarded-host") ??
-      getRequestHeader("host") ??
-      "";
-    const proto = getRequestHeader("x-forwarded-proto") ?? "https";
-    const resultUrl = host
-      ? `${proto}://${host}/api/public/daraja/result`
-      : "";
-
-    const phone = row.phone_encrypted as string | null;
-    if (!phone) {
-      await supabaseAdmin
-        .from("responses")
-        .update({ mpesa_payout_status: "failed", mpesa_last_error: "missing phone" })
-        .eq("id", session.rid);
-      return { ok: true as const, masked: "0XXXXXXXXX", payoutStatus: "failed" as const };
-    }
-
-    const masked = maskPhone(phone);
-
-    // Insert pending attempt
-    const { data: attempt } = await supabaseAdmin
-      .from("payout_attempts")
-      .insert({ response_id: session.rid, amount: 100, status: "pending" })
-      .select("id")
-      .single();
-
-    try {
-      const { ok, data: result } = await sendB2C({
-        msisdn: toMsisdn(phone),
-        amount: 100,
-        responseId: session.rid,
-        resultUrl,
-        remarks: "USIU Cybersecurity Survey reward",
-      });
-
-      await supabaseAdmin
-        .from("payout_attempts")
-        .update({
-          conversation_id: result.ConversationID ?? null,
-          originator_conversation_id: result.OriginatorConversationID ?? null,
-          raw_response: result as never,
-          status: ok ? "submitted" : "failed",
-        })
-        .eq("id", attempt?.id ?? "");
-
-      await supabaseAdmin
-        .from("responses")
-        .update({
-          mpesa_payout_status: ok ? "submitted" : "failed",
-          mpesa_last_error: ok ? null : (result.ResponseDescription ?? result.errorMessage ?? "B2C failed"),
-        })
-        .eq("id", session.rid);
-
-      deleteCookie(SESSION_COOKIE, { path: "/" });
-      return {
-        ok: true as const,
-        masked,
-        payoutStatus: ok ? ("submitted" as const) : ("failed" as const),
-      };
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error("B2C error", msg);
-      await supabaseAdmin
-        .from("payout_attempts")
-        .update({ status: "failed", raw_response: { error: msg } as never })
-        .eq("id", attempt?.id ?? "");
-      await supabaseAdmin
-        .from("responses")
-        .update({ mpesa_payout_status: "failed", mpesa_last_error: msg })
-        .eq("id", session.rid);
-      deleteCookie(SESSION_COOKIE, { path: "/" });
-      return { ok: true as const, masked, payoutStatus: "failed" as const };
-    }
+    // localStorage bypass — payout is skipped until Daraja credentials are configured
+    const masked = "07XXXXXXXX";
+    return { ok: true as const, masked, payoutStatus: "pending" as const };
   });
 
 // ---------- Resume helper ----------
@@ -282,20 +100,11 @@ export const getSessionInfo = createServerFn({ method: "GET" }).handler(async ()
   const token = getCookie(SESSION_COOKIE);
   const session = verifySession(token);
   if (!session) return { active: false as const };
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("responses")
-    .select("section_a, section_b, section_c, section_d, completed")
-    .eq("id", session.rid)
-    .single();
+
+  // localStorage bypass — saved sections come from localStorage on the client side
   return {
     active: true as const,
-    completed: data?.completed ?? false,
-    saved: {
-      a: data?.section_a ?? null,
-      b: data?.section_b ?? null,
-      c: data?.section_c ?? null,
-      d: data?.section_d ?? null,
-    },
+    completed: false,
+    saved: { a: null, b: null, c: null, d: null },
   };
 });
