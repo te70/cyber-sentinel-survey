@@ -10,7 +10,7 @@ export const Route = createFileRoute("/surveys/section-a")({
 });
 
 const STORAGE_KEY = "ts_survey_sectionA";
-const QUESTIONS = ["A1", "A2", "A3", "A4", "A5", "A6"] as const;
+const QUESTIONS = ["A2", "A3", "A4", "A5"] as const;
 const TOTAL_SECTIONS = 4;
 
 type SectionAState = {
@@ -70,14 +70,8 @@ function SectionAPage() {
   function validateStep(): boolean {
     const e: Record<string, string> = {};
     const q = QUESTIONS[step];
-    if (q === "A1") {
-      if (!data.A1) e.A1 = "Required";
-      if (data.A1 === "Other digital services" && !(data.A1_other ?? "").trim()) e.A1_other = "Please specify";
-    } else if (q === "A5") {
+    if (q === "A5") {
       if (!data.A5 || data.A5.length === 0) e.A5 = "Select at least one option";
-    } else if (q === "A6") {
-      if (!data.A6) e.A6 = "Required";
-      if (data.A6 === "Other" && !(data.A6_other ?? "").trim()) e.A6_other = "Please specify";
     } else {
       if (!data[q]) e[q] = "Required";
     }
@@ -101,7 +95,7 @@ function SectionAPage() {
   }
 
   const q = QUESTIONS[step];
-  const isAllAnsweredStep = q === "A1" ? !!data.A1 : q === "A5" ? (data.A5?.length ?? 0) > 0 : !!data[q as keyof SectionAState];
+  const isAllAnsweredStep = q === "A5" ? (data.A5?.length ?? 0) > 0 : !!data[q as keyof SectionAState];
 
   return (
     <SurveyShell
@@ -116,28 +110,6 @@ function SectionAPage() {
       saved={saved}
     >
       <div className="py-6">
-        {/* Question A1 — Sector */}
-        {q === "A1" && (
-          <QuestionBlock label={SECTION_A.A1.label} error={errors.A1}>
-            <div className="flex flex-col gap-2">
-              {SECTION_A.A1.options.map((opt) => (
-                <OptionButton key={opt} label={opt} selected={data.A1 === opt} onClick={() => update({ ...data, A1: opt })} />
-              ))}
-            </div>
-            {data.A1 === "Other digital services" && (
-              <div className="overflow-hidden" style={{ maxHeight: data.A1 ? "52px" : "0", transition: "max-height 200ms ease" }}>
-                <input
-                  className="mt-2 h-12 w-full rounded-lg border border-[var(--ts-border-strong)] bg-white px-4 text-sm outline-none focus:border-2 focus:border-[var(--ts-teal)]"
-                  placeholder="Please specify"
-                  value={data.A1_other ?? ""}
-                  onChange={(e) => update({ ...data, A1_other: e.target.value })}
-                />
-                {errors.A1_other && <p className="mt-1 text-xs text-[var(--ts-error)]">{errors.A1_other}</p>}
-              </div>
-            )}
-          </QuestionBlock>
-        )}
-
         {/* A2 — Employees */}
         {q === "A2" && (
           <QuestionBlock label={SECTION_A.A2.label} error={errors.A2}>
@@ -202,27 +174,6 @@ function SectionAPage() {
           </QuestionBlock>
         )}
 
-        {/* A6 — Role */}
-        {q === "A6" && (
-          <QuestionBlock label={SECTION_A.A6.label} error={errors.A6}>
-            <div className="flex flex-col gap-2">
-              {SECTION_A.A6.options.map((opt) => (
-                <OptionButton key={opt} label={opt} selected={data.A6 === opt} onClick={() => update({ ...data, A6: opt })} />
-              ))}
-            </div>
-            {data.A6 === "Other" && (
-              <div style={{ maxHeight: "52px", transition: "max-height 200ms ease", overflow: "hidden" }}>
-                <input
-                  className="mt-2 h-12 w-full rounded-lg border border-[var(--ts-border-strong)] bg-white px-4 text-sm outline-none focus:border-2 focus:border-[var(--ts-teal)]"
-                  placeholder="Please specify"
-                  value={data.A6_other ?? ""}
-                  onChange={(e) => update({ ...data, A6_other: e.target.value })}
-                />
-                {errors.A6_other && <p className="mt-1 text-xs text-[var(--ts-error)]">{errors.A6_other}</p>}
-              </div>
-            )}
-          </QuestionBlock>
-        )}
       </div>
     </SurveyShell>
   );

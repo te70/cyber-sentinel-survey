@@ -31,6 +31,16 @@ const ROLES = [
   "Operations Manager",
   "Other senior role with IT oversight",
 ];
+const SOCIAL_PLATFORMS = [
+  "Facebook",
+  "Instagram",
+  "X (Twitter)",
+  "LinkedIn",
+  "TikTok",
+  "YouTube",
+  "WhatsApp Business",
+  "Telegram",
+];
 const AGE_GROUPS = ["18–24", "25–34", "35–44", "45–54", "55 or older"];
 const GENDERS = ["Male", "Female", "Non-binary / gender diverse", "Prefer not to say"];
 const EDUCATION_LEVELS = [
@@ -41,31 +51,27 @@ const EDUCATION_LEVELS = [
   "Doctorate (PhD)",
   "Other",
 ];
-const YEARS_IN_BUSINESS = [
-  "Less than 1 year",
-  "1–2 years",
-  "3–5 years",
-  "6–10 years",
-  "More than 10 years",
-];
-
 type FormState = {
   q1: "yes" | "no" | "";
   q2: string;
   q3: string;
   q4: "yes" | "no" | "";
+  // Identity
+  fullName: string;
+  businessName: string;
+  socialPlatforms: string[];
+  socialHandle: string;
   // Demographics
   age: string;
   gender: string;
   education: string;
-  yearsInBusiness: string;
   phone: string;
 };
 
 function Screening() {
   const navigate = useNavigate();
   const submit = useServerFn(submitScreening);
-  const [form, setForm] = useState<FormState>({ q1: "", q2: "", q3: "", q4: "", age: "", gender: "", education: "", yearsInBusiness: "", phone: "" });
+  const [form, setForm] = useState<FormState>({ q1: "", q2: "", q3: "", q4: "", fullName: "", businessName: "", socialPlatforms: [], socialHandle: "", age: "", gender: "", education: "", phone: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverErr, setServerErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -76,10 +82,12 @@ function Screening() {
     if (!form.q2) e.q2 = "Select an option.";
     if (!form.q3) e.q3 = "Select an option.";
     if (!form.q4) e.q4 = "Please answer this question.";
+    if (!form.fullName.trim()) e.fullName = "Please enter your full name.";
+    if (!form.businessName.trim()) e.businessName = "Please enter your business name.";
+    if (form.socialPlatforms.length === 0) e.socialPlatforms = "Select at least one platform.";
     if (!form.age) e.age = "Select an option.";
     if (!form.gender) e.gender = "Select an option.";
     if (!form.education) e.education = "Select an option.";
-    if (!form.yearsInBusiness) e.yearsInBusiness = "Select an option.";
     if (!PHONE_REGEX.test(form.phone)) e.phone = "Format: 07XXXXXXXX or 01XXXXXXXX (10 digits).";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -103,10 +111,20 @@ function Screening() {
       });
       if (res.ok) {
         localStorage.setItem("ts_screening_demographics", JSON.stringify({
+          fullName: form.fullName,
+          businessName: form.businessName,
+          socialPlatforms: form.socialPlatforms,
+          socialHandle: form.socialHandle,
           age: form.age,
           gender: form.gender,
           education: form.education,
-          yearsInBusiness: form.yearsInBusiness,
+        }));
+        // Pre-populate Section A with answers already given so they aren't asked again
+        const existingA = JSON.parse(localStorage.getItem("ts_survey_sectionA") || "{}");
+        localStorage.setItem("ts_survey_sectionA", JSON.stringify({
+          ...existingA,
+          A1: form.q2 === "__none" ? "" : form.q2,
+          A6: form.q3 === "__none" ? "" : form.q3,
         }));
         navigate({ to: "/survey" });
       } else if (res.reason === "duplicate") {
@@ -238,6 +256,77 @@ function Screening() {
             />
           </FormBlock>
 
+          {/* Identity fields */}
+          <FormBlock label="5. Your full name" error={errors.fullName}>
+            <input
+              type="text"
+              autoComplete="name"
+              value={form.fullName}
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+              placeholder="e.g. Jane Wanjiku"
+              className="w-full rounded-lg border bg-card px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </FormBlock>
+
+          <FormBlock label="6. Business name" error={errors.businessName}>
+            <input
+              type="text"
+              autoComplete="organization"
+              value={form.businessName}
+              onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+              placeholder="e.g. Wanjiku Tech Solutions"
+              className="w-full rounded-lg border bg-card px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </FormBlock>
+
+          <FormBlock
+            label="7. Which social media platforms does your business use?"
+            help="Select all that apply"
+            error={errors.socialPlatforms}
+          >
+            <div className="flex flex-wrap gap-2">
+              {SOCIAL_PLATFORMS.map((platform) => {
+                const active = form.socialPlatforms.includes(platform);
+                return (
+                  <button
+                    key={platform}
+                    type="button"
+                    onClick={() => {
+                      const cur = form.socialPlatforms;
+                      setForm({
+                        ...form,
+                        socialPlatforms: active
+                          ? cur.filter((p) => p !== platform)
+                          : [...cur, platform],
+                      });
+                    }}
+                    className={`rounded-lg border px-3 py-2 text-sm transition ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background hover:bg-secondary"
+                    }`}
+                  >
+                    {platform}
+                  </button>
+                );
+              })}
+            </div>
+          </FormBlock>
+
+          <FormBlock
+            label="8. Your business social media handle"
+            help="Optional — the username or page name on your main platform (e.g. @wanjikutech)"
+            error={errors.socialHandle}
+          >
+            <input
+              type="text"
+              value={form.socialHandle}
+              onChange={(e) => setForm({ ...form, socialHandle: e.target.value })}
+              placeholder="@yourbusiness"
+              className="w-full rounded-lg border bg-card px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </FormBlock>
+
           {/* Demographic separator */}
           <div className="relative my-2">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-dashed" /></div>
@@ -247,7 +336,7 @@ function Screening() {
           </div>
 
           {/* Age */}
-          <FormBlock label="5. What is your age group?" error={errors.age}>
+          <FormBlock label="9. What is your age group?" error={errors.age}>
             <RadioGroup
               name="age"
               value={form.age}
@@ -257,7 +346,7 @@ function Screening() {
           </FormBlock>
 
           {/* Gender */}
-          <FormBlock label="6. What is your gender?" error={errors.gender}>
+          <FormBlock label="10. What is your gender?" error={errors.gender}>
             <RadioGroup
               name="gender"
               value={form.gender}
@@ -267,7 +356,7 @@ function Screening() {
           </FormBlock>
 
           {/* Education */}
-          <FormBlock label="7. What is your highest level of education?" error={errors.education}>
+          <FormBlock label="11. What is your highest level of education?" error={errors.education}>
             <div className="space-y-2">
               {EDUCATION_LEVELS.map((opt) => (
                 <RadioRow
@@ -280,16 +369,6 @@ function Screening() {
                 />
               ))}
             </div>
-          </FormBlock>
-
-          {/* Years in business */}
-          <FormBlock label="8. How long has your business been operating?" error={errors.yearsInBusiness}>
-            <RadioGroup
-              name="yearsInBusiness"
-              value={form.yearsInBusiness}
-              onChange={(v) => setForm({ ...form, yearsInBusiness: v })}
-              options={YEARS_IN_BUSINESS.map((y) => ({ value: y, label: y }))}
-            />
           </FormBlock>
 
           {/* Phone */}
