@@ -1,7 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Shield } from "lucide-react";
+
+const supabase = {
+  auth: {
+    getUser: async () => ({ data: { user: null } }),
+    signInWithPassword: async (_: unknown) => ({ error: new Error("Auth not configured") }),
+    signUp: async (_: unknown) => ({ error: new Error("Auth not configured") }),
+  },
+};
 
 export const Route = createFileRoute("/auth")({
   head: () => ({

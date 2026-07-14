@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { SurveyShell } from "@/components/surveys/SurveyShell";
-import { TsLikertGrid } from "@/components/surveys/TsLikertGrid";
 import { D1_ITEMS, D2_ITEMS, D3_ITEMS, D4_PROMPTS } from "@/lib/survey/schema";
 import { showToast } from "@/components/surveys/ui/TsToast";
 
@@ -11,7 +10,7 @@ export const Route = createFileRoute("/surveys/section-d")({
 });
 
 const STORAGE_KEY = "ts_survey_sectionD";
-type SectionDState = Record<string, number | string | undefined>;
+type SectionDState = Record<string, string | undefined>;
 
 const D4_PLACEHOLDERS: Record<string, string> = {
   D4a: "e.g. The six-domain structure gave me a clear framework to benchmark our security posture",
@@ -41,17 +40,18 @@ function SectionDPage() {
 
   function update(next: SectionDState) { setData(next); persist(next); }
 
-  function allLikert(prefix: string, count: number) {
-    return Array.from({ length: count }, (_, i) => `${prefix}_${i + 1}`).every(
-      (k) => typeof data[k] === "number",
-    );
+  function allAnswered(prefix: string, items: string[]) {
+    return items.every((_, i) => {
+      const val = data[`${prefix}_${i + 1}`];
+      return val === "yes" || val === "no";
+    });
   }
 
   function isComplete(): boolean {
-    if (step === 0) return allLikert("D1", D1_ITEMS.length);
-    if (step === 1) return allLikert("D2", D2_ITEMS.length);
-    if (step === 2) return allLikert("D3", D3_ITEMS.length);
-    return true; // D4 is optional
+    if (step === 0) return allAnswered("D1", D1_ITEMS);
+    if (step === 1) return allAnswered("D2", D2_ITEMS);
+    if (step === 2) return allAnswered("D3", D3_ITEMS);
+    return true; // D4 optional
   }
 
   async function onNext() {
@@ -60,13 +60,22 @@ function SectionDPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       setBusy(true);
-      // Submit to server — completion handled by existing completeSurvey server fn
       try {
         const { completeSurvey } = await import("@/lib/survey/survey.functions");
-        const res = await completeSurvey({ data: { section_d: data as Record<string, unknown> } });
+        const sectionA = JSON.parse(localStorage.getItem("ts_survey_sectionA") || "{}");
+        const sectionB = JSON.parse(localStorage.getItem("ts_survey_sectionB") || "{}");
+        const sectionC = JSON.parse(localStorage.getItem("ts_survey_sectionC") || "{}");
+        const res = await completeSurvey({
+          data: {
+            section_a: sectionA,
+            section_b: sectionB,
+            section_c: sectionC,
+            section_d: data as Record<string, unknown>,
+          },
+        });
         if (res.ok) navigate({ to: "/surveys/complete" });
+        else navigate({ to: "/surveys/complete" });
       } catch {
-        // fallback navigate even if submission fails
         navigate({ to: "/surveys/complete" });
       } finally {
         setBusy(false);
@@ -100,16 +109,10 @@ function SectionDPage() {
             <h2 className="mb-1 text-lg font-semibold text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-display)" }}>
               D1. Usability rating
             </h2>
-            <p className="mb-4 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-              Having completed the assessment, rate how well each statement describes your experience.
+            <p className="mb-5 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
+              Having completed the assessment, does each statement describe your experience?
             </p>
-            {/* Reverse-scored items rendered identically — no label, reversal is server-side */}
-            <TsLikertGrid
-              items={D1_ITEMS.map((i) => i.text)}
-              prefix="D1"
-              values={data as Record<string, number | undefined>}
-              onChange={(k, v) => update({ ...data, [k]: v })}
-            />
+            <YesNoGrid prefix="D1" items={D1_ITEMS} data={data} update={update} />
           </>
         )}
 
@@ -118,12 +121,10 @@ function SectionDPage() {
             <h2 className="mb-1 text-lg font-semibold text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-display)" }}>
               D2. Perceived usefulness &amp; adoption intention
             </h2>
-            <TsLikertGrid
-              items={D2_ITEMS}
-              prefix="D2"
-              values={data as Record<string, number | undefined>}
-              onChange={(k, v) => update({ ...data, [k]: v })}
-            />
+            <p className="mb-5 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
+              Does each statement apply to how you see yourself using this tool?
+            </p>
+            <YesNoGrid prefix="D2" items={D2_ITEMS} data={data} update={update} />
           </>
         )}
 
@@ -132,12 +133,10 @@ function SectionDPage() {
             <h2 className="mb-1 text-lg font-semibold text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-display)" }}>
               D3. Local relevance &amp; contextual fit
             </h2>
-            <TsLikertGrid
-              items={D3_ITEMS}
-              prefix="D3"
-              values={data as Record<string, number | undefined>}
-              onChange={(k, v) => update({ ...data, [k]: v })}
-            />
+            <p className="mb-5 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
+              Does each statement apply to this assessment tool?
+            </p>
+            <YesNoGrid prefix="D3" items={D3_ITEMS} data={data} update={update} />
           </>
         )}
 
@@ -150,26 +149,16 @@ function SectionDPage() {
               const val = (data[k] as string | undefined) ?? "";
               return (
                 <div key={k} className="space-y-1">
-                  <label
-                    htmlFor={k}
-                    className="block text-sm font-medium text-[var(--ts-text-primary)]"
-                    style={{ fontFamily: "var(--ts-font-body)" }}
-                  >
+                  <label htmlFor={k} className="block text-sm font-medium text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
                     {prompt} <span className="font-normal text-[var(--ts-text-secondary)]">(optional)</span>
                   </label>
                   <textarea
-                    id={k}
-                    rows={4}
-                    maxLength={500}
-                    value={val}
-                    placeholder={D4_PLACEHOLDERS[k]}
+                    id={k} rows={4} maxLength={500} value={val} placeholder={D4_PLACEHOLDERS[k]}
                     onChange={(e) => update({ ...data, [k]: e.target.value })}
-                    className="w-full resize-none rounded-lg border border-[var(--ts-border-strong)] bg-white p-3 text-sm text-[var(--ts-text-primary)] outline-none focus:border-2 focus:border-[var(--ts-teal)] focus:shadow-[var(--ts-shadow-teal)]"
+                    className="w-full resize-none rounded-lg border border-[var(--ts-border-strong)] bg-white p-3 text-sm text-[var(--ts-text-primary)] outline-none focus:border-2 focus:border-[var(--ts-teal)]"
                     style={{ fontFamily: "var(--ts-font-body)", minHeight: "120px" }}
                   />
-                  <p className="text-right text-xs text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-                    {val.length} / 500
-                  </p>
+                  <p className="text-right text-xs text-[var(--ts-text-secondary)]">{val.length} / 500</p>
                 </div>
               );
             })}
@@ -177,5 +166,40 @@ function SectionDPage() {
         )}
       </div>
     </SurveyShell>
+  );
+}
+
+function YesNoGrid({ prefix, items, data, update }: {
+  prefix: string;
+  items: string[];
+  data: SectionDState;
+  update: (next: SectionDState) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {items.map((item, i) => {
+        const key = `${prefix}_${i + 1}`;
+        const val = data[key];
+        return (
+          <div key={key} className="rounded-xl border bg-white p-4 space-y-3">
+            <p className="text-sm text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-body)" }}>{item}</p>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => update({ ...data, [key]: "yes" })}
+                className={["flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
+                  val === "yes"
+                    ? "border-2 border-[var(--ts-teal)] bg-[var(--ts-teal)] text-white"
+                    : "border border-[var(--ts-border)] bg-[var(--ts-surface)] text-[var(--ts-text-body)] hover:border-[var(--ts-teal-dim)]"].join(" ")}
+                style={{ fontFamily: "var(--ts-font-body)" }}>Yes</button>
+              <button type="button" onClick={() => update({ ...data, [key]: "no" })}
+                className={["flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
+                  val === "no"
+                    ? "border-2 border-red-400 bg-red-50 text-red-700"
+                    : "border border-[var(--ts-border)] bg-[var(--ts-surface)] text-[var(--ts-text-body)] hover:border-[var(--ts-teal-dim)]"].join(" ")}
+                style={{ fontFamily: "var(--ts-font-body)" }}>No</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

@@ -6,12 +6,13 @@ import {
   adminGetStats,
   adminListResponses,
   adminExportCsv,
-  adminRetryPayout,
   checkIsAdmin,
 } from "@/lib/survey/admin.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { TARGET_RESPONSES } from "@/lib/survey/schema";
-import { LogOut, Download, RefreshCw, ShieldAlert } from "lucide-react";
+import { LogOut, Download, ShieldAlert } from "lucide-react";
+import { ResponseDetail } from "@/components/admin/ResponseDetail";
+
+const supabase = { auth: { signOut: async () => {} } };
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin dashboard" }, { name: "robots", content: "noindex" }] }),
@@ -24,9 +25,8 @@ function Admin() {
   const stats = useServerFn(adminGetStats);
   const list = useServerFn(adminListResponses);
   const csv = useServerFn(adminExportCsv);
-  const retry = useServerFn(adminRetryPayout);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [filter, setFilter] = useState<string>("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     check()
@@ -40,8 +40,8 @@ function Admin() {
     enabled: !!isAdmin,
   });
   const listQ = useQuery({
-    queryKey: ["admin-list", filter],
-    queryFn: () => list({ data: { payoutStatus: filter || undefined, limit: 200 } }),
+    queryKey: ["admin-list"],
+    queryFn: () => list({ data: { limit: 200 } }),
     enabled: !!isAdmin,
   });
 
@@ -55,13 +55,10 @@ function Admin() {
           <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
           <h1 className="mt-2 text-lg font-semibold">Not authorised</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your account is signed in but has not been granted the admin role.
+            Your account has not been granted admin access.
           </p>
           <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
+            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}
             className="mt-4 rounded-md border px-4 py-2 text-xs"
           >
             Sign out
@@ -82,12 +79,6 @@ function Admin() {
     URL.revokeObjectURL(url);
   }
 
-  async function onRetry(id: string) {
-    await retry({ data: { responseId: id } });
-    listQ.refetch();
-    statsQ.refetch();
-  }
-
   const s = statsQ.data;
   const completed = s?.completed ?? 0;
   const pct = Math.min(100, Math.round((completed / TARGET_RESPONSES) * 100));
@@ -98,10 +89,7 @@ function Admin() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <h1 className="text-lg font-semibold">Researcher dashboard</h1>
           <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
+            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}
             className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs"
           >
             <LogOut className="h-3.5 w-3.5" /> Sign out
@@ -121,89 +109,69 @@ function Admin() {
           <div className="h-full bg-success" style={{ width: `${pct}%` }} />
         </div>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-4">
-          {(["sent", "submitted", "failed", "pending"] as const).map((k) => (
-            <Stat key={k} label={`Payout: ${k}`} value={`${s?.payouts?.[k] ?? 0}`} />
-          ))}
-        </section>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-muted-foreground">Filter payout</label>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="rounded-md border bg-background px-2 py-1 text-xs"
-            >
-              <option value="">All</option>
-              <option value="sent">sent</option>
-              <option value="submitted">submitted</option>
-              <option value="failed">failed</option>
-              <option value="pending">pending</option>
-            </select>
-          </div>
+        <div className="mt-8 flex justify-end">
           <button
             onClick={onExport}
             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
           >
-            <Download className="h-3.5 w-3.5" /> Export CSV (anonymised)
+            <Download className="h-3.5 w-3.5" /> Export CSV
           </button>
         </div>
 
         <section className="mt-4 overflow-hidden rounded-xl border">
+          <div className="flex items-center justify-between border-b bg-secondary/50 px-4 py-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Responses ({(listQ.data ?? []).length})
+            </span>
+            <span className="text-[11px] text-muted-foreground">Click a row to view full details</span>
+          </div>
           <table className="w-full text-sm">
             <thead className="bg-secondary text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Date</th>
-                <th className="px-3 py-2">Phone</th>
+                <th className="px-3 py-2">Business</th>
                 <th className="px-3 py-2">Sector</th>
                 <th className="px-3 py-2">Status</th>
-                <th className="px-3 py-2">Payout</th>
-                <th className="px-3 py-2"></th>
+                <th className="px-3 py-2 w-8" />
               </tr>
             </thead>
             <tbody>
               {(listQ.data ?? []).map((r) => (
-                <tr key={r.id} className="border-t">
+                <tr
+                  key={r.id}
+                  className="border-t cursor-pointer hover:bg-muted/50 transition-colors group"
+                  onClick={() => setSelectedId(r.id)}
+                >
                   <td className="px-3 py-2 text-xs text-muted-foreground">
                     {new Date(r.created_at).toLocaleString()}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">{r.masked_phone}</td>
-                  <td className="px-3 py-2 text-xs">{r.sector ?? "—"}</td>
-                  <td className="px-3 py-2 text-xs">
-                    {r.completed ? "✅ completed" : r.screened_in ? "📝 partial" : "—"}
+                  <td className="px-3 py-2 text-xs font-medium">
+                    {r.business_name ?? <span className="text-muted-foreground italic">Unknown</span>}
                   </td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.sector ?? "—"}</td>
                   <td className="px-3 py-2 text-xs">
-                    <span
-                      className={
-                        r.payout_status === "sent"
-                          ? "text-success"
-                          : r.payout_status === "failed"
-                            ? "text-destructive"
-                            : "text-muted-foreground"
-                      }
-                    >
-                      {r.payout_status}
-                    </span>
-                    {r.payout_error && (
-                      <div className="text-[10px] text-destructive/80">{r.payout_error}</div>
+                    {r.completed ? (
+                      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        Completed
+                      </span>
+                    ) : r.screened_in ? (
+                      <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                        Partial
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                        Screened
+                      </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right">
-                    {r.completed && r.payout_status !== "sent" && (
-                      <button
-                        onClick={() => onRetry(r.id)}
-                        className="inline-flex items-center gap-1 rounded border px-2 py-1 text-[11px]"
-                      >
-                        <RefreshCw className="h-3 w-3" /> Retry
-                      </button>
-                    )}
+                  <td className="px-3 py-2 text-xs text-muted-foreground group-hover:text-foreground">
+                    →
                   </td>
                 </tr>
               ))}
               {(listQ.data ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-xs text-muted-foreground">
+                  <td colSpan={5} className="px-3 py-6 text-center text-xs text-muted-foreground">
                     No responses yet.
                   </td>
                 </tr>
@@ -212,6 +180,10 @@ function Admin() {
           </table>
         </section>
       </main>
+
+      {selectedId && (
+        <ResponseDetail id={selectedId} onClose={() => setSelectedId(null)} />
+      )}
     </div>
   );
 }

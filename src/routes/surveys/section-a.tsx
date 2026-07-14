@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { SurveyShell } from "@/components/surveys/SurveyShell";
 import { SECTION_A } from "@/lib/survey/schema";
 import { showToast } from "@/components/surveys/ui/TsToast";
+import { saveSection } from "@/lib/survey/survey.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/surveys/section-a")({
   head: () => ({ meta: [{ title: "Section A — Tetrasec Surveys" }, { name: "robots", content: "noindex" }] }),
@@ -43,6 +45,7 @@ function OptionButton({
 
 function SectionAPage() {
   const navigate = useNavigate();
+  const save = useServerFn(saveSection);
   const [step, setStep] = useState(0);
   const [data, setData] = useState<SectionAState>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,12 +82,14 @@ function SectionAPage() {
     return Object.keys(e).length === 0;
   }
 
-  function onNext() {
+  async function onNext() {
     if (!validateStep()) return;
     if (step < QUESTIONS.length - 1) {
       setStep((s) => s + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
+      const payload = JSON.parse(localStorage.getItem("ts_survey_sectionA") || "{}");
+      try { await save({ data: { section: "section_a", payload } }); } catch { /* non-blocking */ }
       navigate({ to: "/surveys/section-b" });
     }
   }

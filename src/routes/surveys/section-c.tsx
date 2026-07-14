@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { SurveyShell } from "@/components/surveys/SurveyShell";
-import { TsLikertGrid } from "@/components/surveys/TsLikertGrid";
 import { SECTION_C_BARRIERS, C5_OPTIONS } from "@/lib/survey/schema";
 import { showToast } from "@/components/surveys/ui/TsToast";
+import { saveSection } from "@/lib/survey/survey.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/surveys/section-c")({
   head: () => ({ meta: [{ title: "Section C — Tetrasec Surveys" }, { name: "robots", content: "noindex" }] }),
@@ -13,11 +14,17 @@ export const Route = createFileRoute("/surveys/section-c")({
 const STORAGE_KEY = "ts_survey_sectionC";
 const BARRIER_KEYS = ["C1", "C2", "C3", "C4"] as const;
 type BarrierKey = (typeof BARRIER_KEYS)[number];
+type SectionCState = Record<string, string | undefined>;
 
-type SectionCState = Record<string, number | string | undefined>;
+function allAnswered(values: SectionCState, prefix: string, count: number) {
+  return Array.from({ length: count }, (_, i) => `${prefix}_${i + 1}`).every(
+    (k) => values[k] === "yes" || values[k] === "no",
+  );
+}
 
 function SectionCPage() {
   const navigate = useNavigate();
+  const save = useServerFn(saveSection);
   const [step, setStep] = useState(0); // 0–3 = barrier grids, 4 = C5
   const [data, setData] = useState<SectionCState>({});
   const [saved, setSaved] = useState(false);
@@ -42,16 +49,20 @@ function SectionCPage() {
     if (step < BARRIER_KEYS.length) {
       const prefix = BARRIER_KEYS[step];
       const count = SECTION_C_BARRIERS[prefix].items.length;
-      return Array.from({ length: count }, (_, i) => `${prefix}_${i + 1}`).every(
-        (k) => typeof data[k] === "number",
-      );
+      return allAnswered(data, prefix, count);
     }
     return !!data["C5"];
   }
 
-  function onNext() {
-    if (step < totalSteps - 1) { setStep((s) => s + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }
-    else navigate({ to: "/surveys/section-d" });
+  async function onNext() {
+    if (step < totalSteps - 1) {
+      setStep((s) => s + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      const payload = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      try { await save({ data: { section: "section_c", payload } }); } catch { /* non-blocking */ }
+      navigate({ to: "/surveys/section-d" });
+    }
   }
 
   function onBack() {
@@ -76,24 +87,7 @@ function SectionCPage() {
       nextDisabledHint="Answer all questions above to continue"
       saved={saved}
     >
-      {/* ⚠️ CRITICAL: sticky warning banner — different scale */}
-      <div
-        className="sticky top-[57px] z-10 mb-4"
-        style={{
-          background: "#FEF3C7",
-          borderLeft: "4px solid var(--ts-warning)",
-          padding: "10px 14px",
-        }}
-      >
-        <p className="text-sm font-semibold text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-          Different scale in this section
-        </p>
-        <p className="text-sm text-[var(--ts-text-body)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-          1 = Not a barrier at all&nbsp;&nbsp;→&nbsp;&nbsp;5 = Critical barrier
-        </p>
-      </div>
-
-      <div className="py-4">
+      <div className="py-6">
         {step < BARRIER_KEYS.length && (() => {
           const prefix = BARRIER_KEYS[step] as BarrierKey;
           const blk = SECTION_C_BARRIERS[prefix];
@@ -102,17 +96,40 @@ function SectionCPage() {
               <h2 className="mb-1 text-lg font-semibold text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-display)" }}>
                 {blk.title}
               </h2>
-              <p className="mb-4 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-                Rate each statement as a barrier to improving cybersecurity.
+              <p className="mb-5 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
+                Does each statement apply as a barrier to improving cybersecurity in your business?
               </p>
-              <TsLikertGrid
-                items={blk.items}
-                prefix={prefix}
-                values={data as Record<string, number | undefined>}
-                onChange={(key, value) => update({ ...data, [key]: value })}
-                scaleMin="Not a barrier"
-                scaleMax="Critical barrier"
-              />
+              <div className="space-y-4">
+                {blk.items.map((item, i) => {
+                  const key = `${prefix}_${i + 1}`;
+                  const val = data[key];
+                  return (
+                    <div key={key} className="rounded-xl border bg-white p-4 space-y-3">
+                      <p className="text-sm text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-body)" }}>{item}</p>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => update({ ...data, [key]: "yes" })}
+                          className={["flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
+                            val === "yes"
+                              ? "border-2 border-amber-400 bg-amber-50 text-amber-700"
+                              : "border border-[var(--ts-border)] bg-[var(--ts-surface)] text-[var(--ts-text-body)] hover:border-amber-300"].join(" ")}
+                          style={{ fontFamily: "var(--ts-font-body)" }}
+                        >Yes, this is a barrier</button>
+                        <button
+                          type="button"
+                          onClick={() => update({ ...data, [key]: "no" })}
+                          className={["flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors",
+                            val === "no"
+                              ? "border-2 border-[var(--ts-teal)] bg-[var(--ts-teal-ghost)] text-[var(--ts-teal)]"
+                              : "border border-[var(--ts-border)] bg-[var(--ts-surface)] text-[var(--ts-text-body)] hover:border-[var(--ts-teal-dim)]"].join(" ")}
+                          style={{ fontFamily: "var(--ts-font-body)" }}
+                        >No, not a barrier</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </>
           );
         })()}
@@ -124,21 +141,13 @@ function SectionCPage() {
             </h2>
             <div className="flex flex-col gap-2">
               {C5_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => update({ ...data, C5: opt })}
-                  className={[
-                    "w-full rounded-lg px-4 py-3 text-sm text-left transition-colors",
-                    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ts-teal)]",
+                <button key={opt} type="button" onClick={() => update({ ...data, C5: opt })}
+                  className={["w-full rounded-lg px-4 py-3 text-sm text-left transition-colors",
                     data["C5"] === opt
                       ? "border-2 border-[var(--ts-teal)] bg-[var(--ts-teal-ghost)]"
-                      : "border border-[var(--ts-border)] bg-white hover:border-[var(--ts-teal-dim)]",
-                  ].join(" ")}
+                      : "border border-[var(--ts-border)] bg-white hover:border-[var(--ts-teal-dim)]"].join(" ")}
                   style={{ fontFamily: "var(--ts-font-body)" }}
-                >
-                  {opt}
-                </button>
+                >{opt}</button>
               ))}
             </div>
           </div>

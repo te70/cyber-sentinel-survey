@@ -21,7 +21,6 @@ import {
   D4_PROMPTS,
   SURVEY_STEPS,
 } from "@/lib/survey/schema";
-import { LikertGrid } from "@/components/survey/LikertGrid";
 
 export const Route = createFileRoute("/survey")({
   head: () => ({
@@ -127,9 +126,9 @@ type SectionA = {
   A6?: string;
   A6_other?: string;
 };
-type SectionB = Record<string, number | string | string[] | undefined>;
-type SectionC = Record<string, number | string | undefined>;
-type SectionD = Record<string, number | string | undefined>;
+type SectionB = Record<string, string | string[] | undefined>;
+type SectionC = Record<string, string | undefined>;
+type SectionD = Record<string, string | undefined>;
 
 function SurveyPage() {
   const navigate = useNavigate();
@@ -211,7 +210,7 @@ function SurveyPage() {
       const block = SECTION_B_LIKERT[prefix];
       block.items.forEach((_, i) => {
         const k = `${prefix}_${i + 1}`;
-        if (typeof b[k] !== "number") e[k] = "Required";
+        if (b[k] !== "yes" && b[k] !== "no") e[k] = "Required";
       });
     } else if (step === 7) {
       const a7 = (b["B7a"] as string[] | undefined) ?? [];
@@ -219,25 +218,25 @@ function SurveyPage() {
       if (!b["B7b"]) e.B7b = "Required";
       if (!b["B7c"]) e.B7c = "Required";
       B7d_ITEMS.forEach((_, i) => {
-        if (typeof b[`B7d_${i + 1}`] !== "number") e[`B7d_${i + 1}`] = "Required";
+        if (b[`B7d_${i + 1}`] !== "yes" && b[`B7d_${i + 1}`] !== "no") e[`B7d_${i + 1}`] = "Required";
       });
     } else if (step === 8) {
       (["C1", "C2", "C3", "C4"] as const).forEach((p) => {
         SECTION_C_BARRIERS[p].items.forEach((_, i) => {
           const k = `${p}_${i + 1}`;
-          if (typeof c[k] !== "number") e[k] = "Required";
+          if (c[k] !== "yes" && c[k] !== "no") e[k] = "Required";
         });
       });
       if (!c.C5) e.C5 = "Required";
     } else if (step === 9) {
       D1_ITEMS.forEach((_, i) => {
-        if (typeof d[`D1_${i + 1}`] !== "number") e[`D1_${i + 1}`] = "Required";
+        if (d[`D1_${i + 1}`] !== "yes" && d[`D1_${i + 1}`] !== "no") e[`D1_${i + 1}`] = "Required";
       });
       D2_ITEMS.forEach((_, i) => {
-        if (typeof d[`D2_${i + 1}`] !== "number") e[`D2_${i + 1}`] = "Required";
+        if (d[`D2_${i + 1}`] !== "yes" && d[`D2_${i + 1}`] !== "no") e[`D2_${i + 1}`] = "Required";
       });
       D3_ITEMS.forEach((_, i) => {
-        if (typeof d[`D3_${i + 1}`] !== "number") e[`D3_${i + 1}`] = "Required";
+        if (d[`D3_${i + 1}`] !== "yes" && d[`D3_${i + 1}`] !== "no") e[`D3_${i + 1}`] = "Required";
       });
       (["D4a", "D4b", "D4c", "D4d"] as const).forEach((k) => {
         if (!(d[k] as string | undefined)?.trim()) e[k] = "Please provide a brief answer";
@@ -409,16 +408,13 @@ function SurveyPage() {
                 <>
                   <h2 className="mb-1 text-lg font-semibold">{blk.title}</h2>
                   <p className="mb-4 text-xs text-muted-foreground">
-                    Rate each statement: 1 = Strongly Disagree → 5 = Strongly Agree.
+                    For each statement, select Yes if it describes your business or No if it does not.
                   </p>
-                  <LikertGrid
+                  <YesNoGrid
                     items={blk.items}
                     prefix={prefix}
-                    values={b as Record<string, number | undefined>}
-                    onChange={(k, v) => {
-                      setB({ ...b, [k]: v });
-                      setErr(k, null);
-                    }}
+                    values={b}
+                    onChange={(k, v) => { setB({ ...b, [k]: v }); setErr(k, null); }}
                   />
                 </>
               );
@@ -473,16 +469,13 @@ function SurveyPage() {
                 B7d. Severity of the cybersecurity threat environment
               </h2>
               <p className="mb-4 text-xs text-muted-foreground">
-                1 = Strongly Disagree → 5 = Strongly Agree.
+                Does each statement apply to your business?
               </p>
-              <LikertGrid
+              <YesNoGrid
                 items={B7d_ITEMS}
                 prefix="B7d"
-                values={b as Record<string, number | undefined>}
-                onChange={(k, v) => {
-                  setB({ ...b, [k]: v });
-                  setErr(k, null);
-                }}
+                values={b}
+                onChange={(k, v) => { setB({ ...b, [k]: v }); setErr(k, null); }}
               />
             </Card>
           </div>
@@ -496,17 +489,13 @@ function SurveyPage() {
                 <Card key={p}>
                   <h2 className="mb-1 text-lg font-semibold">{blk.title}</h2>
                   <p className="mb-4 text-xs text-muted-foreground">
-                    1 = Not a barrier → 5 = Critical barrier.
+                    Does each statement apply as a barrier to improving cybersecurity in your business?
                   </p>
-                  <LikertGrid
+                  <BarrierGrid
                     items={blk.items}
                     prefix={p}
-                    values={c as Record<string, number | undefined>}
-                    onChange={(k, v) => {
-                      setC({ ...c, [k]: v });
-                      setErr(k, null);
-                    }}
-                    scale="barrier"
+                    values={c}
+                    onChange={(k, v) => { setC({ ...c, [k]: v }); setErr(k, null); }}
                   />
                 </Card>
               );
@@ -538,17 +527,13 @@ function SurveyPage() {
             <Card>
               <h2 className="mb-1 text-lg font-semibold">D1. Usability rating</h2>
               <p className="mb-4 text-xs text-muted-foreground">
-                1 = Strongly Disagree → 5 = Strongly Agree.
+                Having completed the assessment, does each statement describe your experience?
               </p>
-              <LikertGrid
-                items={D1_ITEMS.map((i) => i.text)}
+              <YesNoGrid
+                items={D1_ITEMS}
                 prefix="D1"
-                reverse={D1_ITEMS.map((i) => i.reverse)}
-                values={d as Record<string, number | undefined>}
-                onChange={(k, v) => {
-                  setD({ ...d, [k]: v });
-                  setErr(k, null);
-                }}
+                values={d}
+                onChange={(k, v) => { setD({ ...d, [k]: v }); setErr(k, null); }}
               />
             </Card>
 
@@ -556,27 +541,27 @@ function SurveyPage() {
               <h2 className="mb-1 text-lg font-semibold">
                 D2. Perceived usefulness &amp; adoption intention
               </h2>
-              <LikertGrid
+              <p className="mb-4 text-xs text-muted-foreground">
+                Does each statement apply to how you see yourself using this tool?
+              </p>
+              <YesNoGrid
                 items={D2_ITEMS}
                 prefix="D2"
-                values={d as Record<string, number | undefined>}
-                onChange={(k, v) => {
-                  setD({ ...d, [k]: v });
-                  setErr(k, null);
-                }}
+                values={d}
+                onChange={(k, v) => { setD({ ...d, [k]: v }); setErr(k, null); }}
               />
             </Card>
 
             <Card>
               <h2 className="mb-1 text-lg font-semibold">D3. Local relevance &amp; contextual fit</h2>
-              <LikertGrid
+              <p className="mb-4 text-xs text-muted-foreground">
+                Does each statement apply to this assessment tool?
+              </p>
+              <YesNoGrid
                 items={D3_ITEMS}
                 prefix="D3"
-                values={d as Record<string, number | undefined>}
-                onChange={(k, v) => {
-                  setD({ ...d, [k]: v });
-                  setErr(k, null);
-                }}
+                values={d}
+                onChange={(k, v) => { setD({ ...d, [k]: v }); setErr(k, null); }}
               />
             </Card>
 
@@ -629,6 +614,72 @@ function SurveyPage() {
           </button>
         </div>
       </main>
+    </div>
+  );
+}
+
+function YesNoGrid({ items, prefix, values, onChange }: {
+  items: readonly string[];
+  prefix: string;
+  values: Record<string, string | string[] | undefined>;
+  onChange: (key: string, value: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => {
+        const key = `${prefix}_${i + 1}`;
+        const val = values[key] as string | undefined;
+        return (
+          <div key={key} className="rounded-xl border bg-background p-4 space-y-3">
+            <p className="text-sm">{item}</p>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => onChange(key, "yes")}
+                className={["flex-1 rounded-lg py-2 text-sm font-semibold transition-colors border",
+                  val === "yes" ? "border-primary bg-primary text-primary-foreground" : "border-input bg-background hover:bg-secondary"].join(" ")}>
+                Yes
+              </button>
+              <button type="button" onClick={() => onChange(key, "no")}
+                className={["flex-1 rounded-lg py-2 text-sm font-semibold transition-colors border",
+                  val === "no" ? "border-destructive bg-destructive/10 text-destructive" : "border-input bg-background hover:bg-secondary"].join(" ")}>
+                No
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BarrierGrid({ items, prefix, values, onChange }: {
+  items: readonly string[];
+  prefix: string;
+  values: Record<string, string | undefined>;
+  onChange: (key: string, value: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => {
+        const key = `${prefix}_${i + 1}`;
+        const val = values[key];
+        return (
+          <div key={key} className="rounded-xl border bg-background p-4 space-y-3">
+            <p className="text-sm">{item}</p>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => onChange(key, "yes")}
+                className={["flex-1 rounded-lg py-2 text-sm font-semibold transition-colors border",
+                  val === "yes" ? "border-amber-500 bg-amber-50 text-amber-700" : "border-input bg-background hover:border-amber-300"].join(" ")}>
+                Yes, this is a barrier
+              </button>
+              <button type="button" onClick={() => onChange(key, "no")}
+                className={["flex-1 rounded-lg py-2 text-sm font-semibold transition-colors border",
+                  val === "no" ? "border-primary bg-primary/5 text-primary" : "border-input bg-background hover:bg-secondary"].join(" ")}>
+                No, not a barrier
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

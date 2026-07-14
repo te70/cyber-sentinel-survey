@@ -3,21 +3,8 @@
 export const TARGET_RESPONSES = 330;
 export const REWARD_AMOUNT_KES = 50;
 
-export const LIKERT_AGREE: { value: number; label: string }[] = [
-  { value: 1, label: "Strongly Disagree" },
-  { value: 2, label: "Disagree" },
-  { value: 3, label: "Neutral" },
-  { value: 4, label: "Agree" },
-  { value: 5, label: "Strongly Agree" },
-];
-
-export const LIKERT_BARRIER: { value: number; label: string }[] = [
-  { value: 1, label: "Not a barrier" },
-  { value: 2, label: "Minor barrier" },
-  { value: 3, label: "Moderate barrier" },
-  { value: 4, label: "Major barrier" },
-  { value: 5, label: "Critical barrier" },
-];
+// Yes/No answer type used in Sections B, C, D
+export type YesNo = "yes" | "no";
 
 // ----- Screening -----
 export const SECTOR_OPTIONS = [
@@ -113,12 +100,12 @@ const B2 = [
   "We review our security risks whenever we start using a new digital service or tool.",
 ];
 const B3 = [
-  "We use two-step verification (e.g. a code sent to your phone plus a password) for important business accounts.",
-  "Staff only have access to the systems and data they need for their specific job.",
-  "When someone leaves the business, their access to all systems is removed straight away.",
-  "We require strong, unique passwords and update them regularly across all accounts.",
-  "We control which devices are allowed to connect to our business network.",
-  "We keep records of who accesses sensitive data and watch for anything unusual.",
+  "We use two-step login (where a code is sent to your phone or email) for all important business accounts.",
+  "Staff only have access to the accounts and tools they actually need for their job — not everything.",
+  "When a staff member or freelancer leaves, we immediately change passwords and remove their access.",
+  "We have a list of all our business accounts (email, social media, banking, M-Pesa, cloud tools) and who has access to each.",
+  "If a business account on Instagram, TikTok, or another platform was hacked, we know exactly what steps to take to recover it.",
+  "We use different passwords for different accounts rather than the same password everywhere.",
 ];
 const B4 = [
   "We use tools or software to watch for suspicious or unusual activity on our systems.",
@@ -137,21 +124,21 @@ const B5 = [
   "We have cyber insurance or money set aside to deal with the costs of a security incident.",
 ];
 const B6 = [
-  "All staff received security awareness training in the past 12 months.",
-  "New staff are shown the basics of online security when they join the business.",
-  "Staff can confidently spot fake or scam messages (e.g. phishing emails, SMS scams).",
-  "We test staff awareness using practice scam emails or other hands-on exercises.",
-  "Security awareness is ongoing in our business — we regularly refresh and update training.",
-  "We check that staff are actually applying good security habits in their day-to-day work.",
+  "Staff in my business know how to spot a fake or suspicious email, WhatsApp message, or phone call.",
+  "Staff know that unexpected M-Pesa STK push prompts they did not initiate should be declined and reported immediately.",
+  "When new staff join, we tell them about the security risks they might face in their role — even informally.",
+  "My business has discussed cybersecurity risks with the team in the past 12 months — even in a casual conversation.",
+  "Staff know not to share passwords, PIN numbers, or M-Pesa confirmation codes with anyone — including people claiming to be from Safaricom or a bank.",
+  "My business has run any kind of awareness activity — a meeting, a shared article, a short briefing — about online safety in the past year.",
 ];
 
 export const SECTION_B_LIKERT = {
-  B1: { title: "Governance & Policy", items: B1 },
+  B1: { title: "Rules & Responsibility", items: B1 },
   B2: { title: "Risk Management", items: B2 },
-  B3: { title: "Access Control", items: B3 },
-  B4: { title: "Incident Detection & Response", items: B4 },
-  B5: { title: "Recovery & Business Continuity", items: B5 },
-  B6: { title: "Awareness & Training", items: B6 },
+  B3: { title: "Controlling Who Gets In", items: B3 },
+  B4: { title: "Spotting and Dealing with Problems", items: B4 },
+  B5: { title: "Getting Back on Track After a Problem", items: B5 },
+  B6: { title: "Staff Knowledge and Awareness", items: B6 },
 } as const;
 
 export const B7a_OPTIONS = [
@@ -177,7 +164,7 @@ export const B7c_OPTIONS = [
   "No significant impact",
   "Not applicable — no incident experienced",
 ];
-export const B7d_ITEMS = [
+export const B7d_ITEMS: string[] = [
   "My business is frequently targeted by criminals because of the digital nature of what we do.",
   "The security threats my business faces have grown worse in the past 12 months.",
   "I am worried that our current security measures are not enough to prevent a serious incident.",
@@ -207,13 +194,13 @@ export const SECTION_C_BARRIERS = {
     ],
   },
   C3: {
-    title: "Technology Barriers",
+    title: "Does It Fit Your Nairobi Business?",
     items: [
-      "Our IT setup is too basic or outdated to support proper security measures.",
-      "Most security frameworks assume a level of IT capability that our business doesn't have yet.",
-      "Unreliable internet in Nairobi makes it hard to use and maintain cloud-based security tools.",
-      "We rely heavily on personal phones for work, which are difficult to secure consistently.",
-      "Developers and third-party platforms we depend on have unknown or weak security practices.",
+      "This check-up covers the security issues that are most relevant to how my business operates in Nairobi.",
+      "The questions about M-Pesa STK fraud, social media account takeovers, and Kenya DPA are relevant to my business.",
+      "This tool feels more relevant to my business than international guidelines I may have heard of (e.g. NIST or ISO standards).",
+      "The language used in this check-up is clear and does not require a technical background to understand.",
+      "This tool reflects the real resource constraints — time, budget, expertise — that my business operates under.",
     ],
   },
   C4: {
@@ -237,17 +224,14 @@ export const C5_OPTIONS = [
 ];
 
 // ----- Section D -----
-export const D1_ITEMS: { text: string; reverse: boolean }[] = [
-  { text: "I found this assessment easy to complete without needing specialist help.", reverse: false },
-  { text: "I would need significant technical help before I could use this tool regularly in my business.", reverse: true },
-  { text: "I understood what each section of the assessment was trying to measure.", reverse: false },
-  { text: "The results clearly show me where my business's security gaps are.", reverse: false },
-  { text: "The tool was too inconsistent for me to trust its results.", reverse: true },
-  { text: "I believe this tool is affordable and the right size for a business like mine.", reverse: false },
-  { text: "The six sections felt well-connected and made sense as a whole.", reverse: false },
-  { text: "I would need to learn a lot of new things before I could use this tool effectively.", reverse: true },
-  { text: "I would recommend this assessment to other digital businesses of a similar size.", reverse: false },
-  { text: "This tool reflects the real security challenges I face as a Nairobi digital SME.", reverse: false },
+export const D1_ITEMS: string[] = [
+  "I found this assessment easy to complete without needing specialist help.",
+  "I understood what each section of the assessment was trying to measure.",
+  "The results clearly show me where my business's security gaps are.",
+  "I believe this tool is affordable and the right size for a business like mine.",
+  "The six sections felt well-connected and made sense as a whole.",
+  "I would recommend this assessment to other digital businesses of a similar size.",
+  "This tool reflects the real security challenges I face as a Nairobi digital SME.",
 ];
 
 export const D2_ITEMS = [

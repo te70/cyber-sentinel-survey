@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Response {
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  phoneHash      String    @map("phone_hash")
+  phoneEncrypted String?   @map("phone_encrypted")
+  screenedIn     Boolean   @default(false) @map("screened_in")
+  completed      Boolean   @default(false)
+  completedAt    DateTime? @map("completed_at")
+  consentedAt    DateTime? @map("consented_at")
+  businessName   String?   @map("business_name")
+  websiteUrl     String?   @map("website_url")
+  screening      Json?
+  sectionA       Json?     @map("section_a")
+  sectionB       Json?     @map("section_b")
+  sectionC       Json?     @map("section_c")
+  sectionD       Json?     @map("section_d")
+  ipAddress      String?   @map("ip_address")
+  userAgent      String?   @map("user_agent")
+
+  @@map("responses")
+}

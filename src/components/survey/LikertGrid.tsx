@@ -1,5 +1,18 @@
-// Reusable Likert grid for survey sections.
-import { LIKERT_AGREE, LIKERT_BARRIER } from "@/lib/survey/schema";
+// Reusable Likert grid — used by the legacy single-page survey route.
+const LIKERT_AGREE = [
+  { value: 1, label: "Strongly Disagree" },
+  { value: 2, label: "Disagree" },
+  { value: 3, label: "Neutral" },
+  { value: 4, label: "Agree" },
+  { value: 5, label: "Strongly Agree" },
+];
+const LIKERT_BARRIER = [
+  { value: 1, label: "Not a barrier" },
+  { value: 2, label: "Minor barrier" },
+  { value: 3, label: "Moderate barrier" },
+  { value: 4, label: "Major barrier" },
+  { value: 5, label: "Critical barrier" },
+];
 
 interface Props {
   items: readonly string[];

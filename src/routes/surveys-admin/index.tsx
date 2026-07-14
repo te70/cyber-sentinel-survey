@@ -65,6 +65,7 @@ function AdminOverview() {
     { label: "Completed",   value: completed, pct: total ? Math.round((completed / total) * 100) : 0 },
   ];
 
+
   // Placeholder sparkline — replace with real daily data from DB
   const sparkline = Array.from({ length: 14 }, (_, i) => ({
     day: i + 1,
@@ -79,12 +80,6 @@ function AdminOverview() {
             TetraSec Surveys — Admin
           </h1>
           <div className="flex items-center gap-4 text-xs text-[var(--ts-text-secondary)]">
-            <Link to="/surveys-admin/queue" className="hover:text-[var(--ts-teal)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-              Review queue
-            </Link>
-            <Link to="/surveys-admin/payouts" className="hover:text-[var(--ts-teal)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-              Payouts
-            </Link>
             <Link to="/surveys-admin/export" className="hover:text-[var(--ts-teal)]" style={{ fontFamily: "var(--ts-font-body)" }}>
               Export
             </Link>
@@ -118,18 +113,6 @@ function AdminOverview() {
                 {value}
               </p>
               <p className="text-xs text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>{p}% of total</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Payout breakdown */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {(["sent", "submitted", "failed", "pending"] as const).map((k) => (
-            <div key={k} className="rounded-xl border bg-card p-4">
-              <p className="text-xs text-[var(--ts-text-secondary)] capitalize" style={{ fontFamily: "var(--ts-font-body)" }}>Payout: {k}</p>
-              <p className="mt-1 text-2xl font-bold tabular-nums" style={{ fontFamily: "var(--ts-font-display)" }}>
-                {s?.payouts?.[k] ?? 0}
-              </p>
             </div>
           ))}
         </div>
