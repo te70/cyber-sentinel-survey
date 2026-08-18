@@ -9,60 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SurveyRouteImport } from './routes/survey'
-import { Route as ScreeningRouteImport } from './routes/screening'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SurveysAdminIndexRouteImport } from './routes/surveys-admin/index'
+import { Route as TrainingIndexRouteImport } from './routes/training/index'
+import { Route as TrainingLessonIdRouteImport } from './routes/training/$lessonId'
 import { Route as ToolsTaxRouteImport } from './routes/tools/tax'
 import { Route as ToolsInvoiceRouteImport } from './routes/tools/invoice'
 import { Route as ToolsContractsRouteImport } from './routes/tools/contracts'
 import { Route as ToolsComplianceRouteImport } from './routes/tools/compliance'
-import { Route as SurveysSectionDRouteImport } from './routes/surveys/section-d'
-import { Route as SurveysSectionCRouteImport } from './routes/surveys/section-c'
-import { Route as SurveysSectionBRouteImport } from './routes/surveys/section-b'
-import { Route as SurveysSectionARouteImport } from './routes/surveys/section-a'
-import { Route as SurveysReportRouteImport } from './routes/surveys/report'
-import { Route as SurveysOtpRouteImport } from './routes/surveys/otp'
-import { Route as SurveysEligibilityRouteImport } from './routes/surveys/eligibility'
-import { Route as SurveysDashboardRouteImport } from './routes/surveys/dashboard'
-import { Route as SurveysAdminExportRouteImport } from './routes/surveys-admin/export'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AlitaStartRouteImport } from './routes/alita/start'
+import { Route as AlitaResultsAssessmentIdRouteImport } from './routes/alita/results.$assessmentId'
+import { Route as AlitaGapsSmeIdRouteImport } from './routes/alita/gaps.$smeId'
+import { Route as AlitaAssessmentAssessmentIdRouteImport } from './routes/alita/assessment.$assessmentId'
 
-const SurveyRoute = SurveyRouteImport.update({
-  id: '/survey',
-  path: '/survey',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScreeningRoute = ScreeningRouteImport.update({
-  id: '/screening',
-  path: '/screening',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SurveysAdminIndexRoute = SurveysAdminIndexRouteImport.update({
-  id: '/surveys-admin/',
-  path: '/surveys-admin/',
+const TrainingIndexRoute = TrainingIndexRouteImport.update({
+  id: '/training/',
+  path: '/training/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainingLessonIdRoute = TrainingLessonIdRouteImport.update({
+  id: '/training/$lessonId',
+  path: '/training/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsTaxRoute = ToolsTaxRouteImport.update({
@@ -85,255 +56,127 @@ const ToolsComplianceRoute = ToolsComplianceRouteImport.update({
   path: '/tools/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SurveysSectionDRoute = SurveysSectionDRouteImport.update({
-  id: '/surveys/section-d',
-  path: '/surveys/section-d',
+const AlitaStartRoute = AlitaStartRouteImport.update({
+  id: '/alita/start',
+  path: '/alita/start',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SurveysSectionCRoute = SurveysSectionCRouteImport.update({
-  id: '/surveys/section-c',
-  path: '/surveys/section-c',
+const AlitaResultsAssessmentIdRoute =
+  AlitaResultsAssessmentIdRouteImport.update({
+    id: '/alita/results/$assessmentId',
+    path: '/alita/results/$assessmentId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AlitaGapsSmeIdRoute = AlitaGapsSmeIdRouteImport.update({
+  id: '/alita/gaps/$smeId',
+  path: '/alita/gaps/$smeId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SurveysSectionBRoute = SurveysSectionBRouteImport.update({
-  id: '/surveys/section-b',
-  path: '/surveys/section-b',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SurveysSectionARoute = SurveysSectionARouteImport.update({
-  id: '/surveys/section-a',
-  path: '/surveys/section-a',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SurveysReportRoute = SurveysReportRouteImport.update({
-  id: '/surveys/report',
-  path: '/surveys/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SurveysOtpRoute = SurveysOtpRouteImport.update({
-  id: '/surveys/otp',
-  path: '/surveys/otp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SurveysEligibilityRoute = SurveysEligibilityRouteImport.update({
-  id: '/surveys/eligibility',
-  path: '/surveys/eligibility',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SurveysDashboardRoute = SurveysDashboardRouteImport.update({
-  id: '/surveys/dashboard',
-  path: '/surveys/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SurveysAdminExportRoute = SurveysAdminExportRouteImport.update({
-  id: '/surveys-admin/export',
-  path: '/surveys-admin/export',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AlitaAssessmentAssessmentIdRoute =
+  AlitaAssessmentAssessmentIdRouteImport.update({
+    id: '/alita/assessment/$assessmentId',
+    path: '/alita/assessment/$assessmentId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/how-it-works': typeof HowItWorksRoute
-  '/screening': typeof ScreeningRoute
-  '/survey': typeof SurveyRoute
-  '/admin': typeof AuthenticatedAdminRoute
-  '/surveys-admin/export': typeof SurveysAdminExportRoute
-  '/surveys/dashboard': typeof SurveysDashboardRoute
-  '/surveys/eligibility': typeof SurveysEligibilityRoute
-  '/surveys/otp': typeof SurveysOtpRoute
-  '/surveys/report': typeof SurveysReportRoute
-  '/surveys/section-a': typeof SurveysSectionARoute
-  '/surveys/section-b': typeof SurveysSectionBRoute
-  '/surveys/section-c': typeof SurveysSectionCRoute
-  '/surveys/section-d': typeof SurveysSectionDRoute
+  '/alita/start': typeof AlitaStartRoute
   '/tools/compliance': typeof ToolsComplianceRoute
   '/tools/contracts': typeof ToolsContractsRoute
   '/tools/invoice': typeof ToolsInvoiceRoute
   '/tools/tax': typeof ToolsTaxRoute
-  '/surveys-admin/': typeof SurveysAdminIndexRoute
+  '/training/$lessonId': typeof TrainingLessonIdRoute
+  '/training/': typeof TrainingIndexRoute
+  '/alita/assessment/$assessmentId': typeof AlitaAssessmentAssessmentIdRoute
+  '/alita/gaps/$smeId': typeof AlitaGapsSmeIdRoute
+  '/alita/results/$assessmentId': typeof AlitaResultsAssessmentIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/how-it-works': typeof HowItWorksRoute
-  '/screening': typeof ScreeningRoute
-  '/survey': typeof SurveyRoute
-  '/admin': typeof AuthenticatedAdminRoute
-  '/surveys-admin/export': typeof SurveysAdminExportRoute
-  '/surveys/dashboard': typeof SurveysDashboardRoute
-  '/surveys/eligibility': typeof SurveysEligibilityRoute
-  '/surveys/otp': typeof SurveysOtpRoute
-  '/surveys/report': typeof SurveysReportRoute
-  '/surveys/section-a': typeof SurveysSectionARoute
-  '/surveys/section-b': typeof SurveysSectionBRoute
-  '/surveys/section-c': typeof SurveysSectionCRoute
-  '/surveys/section-d': typeof SurveysSectionDRoute
+  '/alita/start': typeof AlitaStartRoute
   '/tools/compliance': typeof ToolsComplianceRoute
   '/tools/contracts': typeof ToolsContractsRoute
   '/tools/invoice': typeof ToolsInvoiceRoute
   '/tools/tax': typeof ToolsTaxRoute
-  '/surveys-admin': typeof SurveysAdminIndexRoute
+  '/training/$lessonId': typeof TrainingLessonIdRoute
+  '/training': typeof TrainingIndexRoute
+  '/alita/assessment/$assessmentId': typeof AlitaAssessmentAssessmentIdRoute
+  '/alita/gaps/$smeId': typeof AlitaGapsSmeIdRoute
+  '/alita/results/$assessmentId': typeof AlitaResultsAssessmentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/how-it-works': typeof HowItWorksRoute
-  '/screening': typeof ScreeningRoute
-  '/survey': typeof SurveyRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/surveys-admin/export': typeof SurveysAdminExportRoute
-  '/surveys/dashboard': typeof SurveysDashboardRoute
-  '/surveys/eligibility': typeof SurveysEligibilityRoute
-  '/surveys/otp': typeof SurveysOtpRoute
-  '/surveys/report': typeof SurveysReportRoute
-  '/surveys/section-a': typeof SurveysSectionARoute
-  '/surveys/section-b': typeof SurveysSectionBRoute
-  '/surveys/section-c': typeof SurveysSectionCRoute
-  '/surveys/section-d': typeof SurveysSectionDRoute
+  '/alita/start': typeof AlitaStartRoute
   '/tools/compliance': typeof ToolsComplianceRoute
   '/tools/contracts': typeof ToolsContractsRoute
   '/tools/invoice': typeof ToolsInvoiceRoute
   '/tools/tax': typeof ToolsTaxRoute
-  '/surveys-admin/': typeof SurveysAdminIndexRoute
+  '/training/$lessonId': typeof TrainingLessonIdRoute
+  '/training/': typeof TrainingIndexRoute
+  '/alita/assessment/$assessmentId': typeof AlitaAssessmentAssessmentIdRoute
+  '/alita/gaps/$smeId': typeof AlitaGapsSmeIdRoute
+  '/alita/results/$assessmentId': typeof AlitaResultsAssessmentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/auth'
-    | '/how-it-works'
-    | '/screening'
-    | '/survey'
-    | '/admin'
-    | '/surveys-admin/export'
-    | '/surveys/dashboard'
-    | '/surveys/eligibility'
-    | '/surveys/otp'
-    | '/surveys/report'
-    | '/surveys/section-a'
-    | '/surveys/section-b'
-    | '/surveys/section-c'
-    | '/surveys/section-d'
+    | '/alita/start'
     | '/tools/compliance'
     | '/tools/contracts'
     | '/tools/invoice'
     | '/tools/tax'
-    | '/surveys-admin/'
+    | '/training/$lessonId'
+    | '/training/'
+    | '/alita/assessment/$assessmentId'
+    | '/alita/gaps/$smeId'
+    | '/alita/results/$assessmentId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
-    | '/how-it-works'
-    | '/screening'
-    | '/survey'
-    | '/admin'
-    | '/surveys-admin/export'
-    | '/surveys/dashboard'
-    | '/surveys/eligibility'
-    | '/surveys/otp'
-    | '/surveys/report'
-    | '/surveys/section-a'
-    | '/surveys/section-b'
-    | '/surveys/section-c'
-    | '/surveys/section-d'
+    | '/alita/start'
     | '/tools/compliance'
     | '/tools/contracts'
     | '/tools/invoice'
     | '/tools/tax'
-    | '/surveys-admin'
+    | '/training/$lessonId'
+    | '/training'
+    | '/alita/assessment/$assessmentId'
+    | '/alita/gaps/$smeId'
+    | '/alita/results/$assessmentId'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
-    | '/auth'
-    | '/how-it-works'
-    | '/screening'
-    | '/survey'
-    | '/_authenticated/admin'
-    | '/surveys-admin/export'
-    | '/surveys/dashboard'
-    | '/surveys/eligibility'
-    | '/surveys/otp'
-    | '/surveys/report'
-    | '/surveys/section-a'
-    | '/surveys/section-b'
-    | '/surveys/section-c'
-    | '/surveys/section-d'
+    | '/alita/start'
     | '/tools/compliance'
     | '/tools/contracts'
     | '/tools/invoice'
     | '/tools/tax'
-    | '/surveys-admin/'
+    | '/training/$lessonId'
+    | '/training/'
+    | '/alita/assessment/$assessmentId'
+    | '/alita/gaps/$smeId'
+    | '/alita/results/$assessmentId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
-  HowItWorksRoute: typeof HowItWorksRoute
-  ScreeningRoute: typeof ScreeningRoute
-  SurveyRoute: typeof SurveyRoute
-  SurveysAdminExportRoute: typeof SurveysAdminExportRoute
-  SurveysDashboardRoute: typeof SurveysDashboardRoute
-  SurveysEligibilityRoute: typeof SurveysEligibilityRoute
-  SurveysOtpRoute: typeof SurveysOtpRoute
-  SurveysReportRoute: typeof SurveysReportRoute
-  SurveysSectionARoute: typeof SurveysSectionARoute
-  SurveysSectionBRoute: typeof SurveysSectionBRoute
-  SurveysSectionCRoute: typeof SurveysSectionCRoute
-  SurveysSectionDRoute: typeof SurveysSectionDRoute
+  AlitaStartRoute: typeof AlitaStartRoute
   ToolsComplianceRoute: typeof ToolsComplianceRoute
   ToolsContractsRoute: typeof ToolsContractsRoute
   ToolsInvoiceRoute: typeof ToolsInvoiceRoute
   ToolsTaxRoute: typeof ToolsTaxRoute
-  SurveysAdminIndexRoute: typeof SurveysAdminIndexRoute
+  TrainingLessonIdRoute: typeof TrainingLessonIdRoute
+  TrainingIndexRoute: typeof TrainingIndexRoute
+  AlitaAssessmentAssessmentIdRoute: typeof AlitaAssessmentAssessmentIdRoute
+  AlitaGapsSmeIdRoute: typeof AlitaGapsSmeIdRoute
+  AlitaResultsAssessmentIdRoute: typeof AlitaResultsAssessmentIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/survey': {
-      id: '/survey'
-      path: '/survey'
-      fullPath: '/survey'
-      preLoaderRoute: typeof SurveyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/screening': {
-      id: '/screening'
-      path: '/screening'
-      fullPath: '/screening'
-      preLoaderRoute: typeof ScreeningRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -341,11 +184,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/surveys-admin/': {
-      id: '/surveys-admin/'
-      path: '/surveys-admin'
-      fullPath: '/surveys-admin/'
-      preLoaderRoute: typeof SurveysAdminIndexRouteImport
+    '/training/': {
+      id: '/training/'
+      path: '/training'
+      fullPath: '/training/'
+      preLoaderRoute: typeof TrainingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/training/$lessonId': {
+      id: '/training/$lessonId'
+      path: '/training/$lessonId'
+      fullPath: '/training/$lessonId'
+      preLoaderRoute: typeof TrainingLessonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/tax': {
@@ -376,111 +226,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/surveys/section-d': {
-      id: '/surveys/section-d'
-      path: '/surveys/section-d'
-      fullPath: '/surveys/section-d'
-      preLoaderRoute: typeof SurveysSectionDRouteImport
+    '/alita/start': {
+      id: '/alita/start'
+      path: '/alita/start'
+      fullPath: '/alita/start'
+      preLoaderRoute: typeof AlitaStartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/surveys/section-c': {
-      id: '/surveys/section-c'
-      path: '/surveys/section-c'
-      fullPath: '/surveys/section-c'
-      preLoaderRoute: typeof SurveysSectionCRouteImport
+    '/alita/results/$assessmentId': {
+      id: '/alita/results/$assessmentId'
+      path: '/alita/results/$assessmentId'
+      fullPath: '/alita/results/$assessmentId'
+      preLoaderRoute: typeof AlitaResultsAssessmentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/surveys/section-b': {
-      id: '/surveys/section-b'
-      path: '/surveys/section-b'
-      fullPath: '/surveys/section-b'
-      preLoaderRoute: typeof SurveysSectionBRouteImport
+    '/alita/gaps/$smeId': {
+      id: '/alita/gaps/$smeId'
+      path: '/alita/gaps/$smeId'
+      fullPath: '/alita/gaps/$smeId'
+      preLoaderRoute: typeof AlitaGapsSmeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/surveys/section-a': {
-      id: '/surveys/section-a'
-      path: '/surveys/section-a'
-      fullPath: '/surveys/section-a'
-      preLoaderRoute: typeof SurveysSectionARouteImport
+    '/alita/assessment/$assessmentId': {
+      id: '/alita/assessment/$assessmentId'
+      path: '/alita/assessment/$assessmentId'
+      fullPath: '/alita/assessment/$assessmentId'
+      preLoaderRoute: typeof AlitaAssessmentAssessmentIdRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/surveys/report': {
-      id: '/surveys/report'
-      path: '/surveys/report'
-      fullPath: '/surveys/report'
-      preLoaderRoute: typeof SurveysReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/surveys/otp': {
-      id: '/surveys/otp'
-      path: '/surveys/otp'
-      fullPath: '/surveys/otp'
-      preLoaderRoute: typeof SurveysOtpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/surveys/eligibility': {
-      id: '/surveys/eligibility'
-      path: '/surveys/eligibility'
-      fullPath: '/surveys/eligibility'
-      preLoaderRoute: typeof SurveysEligibilityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/surveys/dashboard': {
-      id: '/surveys/dashboard'
-      path: '/surveys/dashboard'
-      fullPath: '/surveys/dashboard'
-      preLoaderRoute: typeof SurveysDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/surveys-admin/export': {
-      id: '/surveys-admin/export'
-      path: '/surveys-admin/export'
-      fullPath: '/surveys-admin/export'
-      preLoaderRoute: typeof SurveysAdminExportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
-  HowItWorksRoute: HowItWorksRoute,
-  ScreeningRoute: ScreeningRoute,
-  SurveyRoute: SurveyRoute,
-  SurveysAdminExportRoute: SurveysAdminExportRoute,
-  SurveysDashboardRoute: SurveysDashboardRoute,
-  SurveysEligibilityRoute: SurveysEligibilityRoute,
-  SurveysOtpRoute: SurveysOtpRoute,
-  SurveysReportRoute: SurveysReportRoute,
-  SurveysSectionARoute: SurveysSectionARoute,
-  SurveysSectionBRoute: SurveysSectionBRoute,
-  SurveysSectionCRoute: SurveysSectionCRoute,
-  SurveysSectionDRoute: SurveysSectionDRoute,
+  AlitaStartRoute: AlitaStartRoute,
   ToolsComplianceRoute: ToolsComplianceRoute,
   ToolsContractsRoute: ToolsContractsRoute,
   ToolsInvoiceRoute: ToolsInvoiceRoute,
   ToolsTaxRoute: ToolsTaxRoute,
-  SurveysAdminIndexRoute: SurveysAdminIndexRoute,
+  TrainingLessonIdRoute: TrainingLessonIdRoute,
+  TrainingIndexRoute: TrainingIndexRoute,
+  AlitaAssessmentAssessmentIdRoute: AlitaAssessmentAssessmentIdRoute,
+  AlitaGapsSmeIdRoute: AlitaGapsSmeIdRoute,
+  AlitaResultsAssessmentIdRoute: AlitaResultsAssessmentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

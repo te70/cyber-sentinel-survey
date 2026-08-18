@@ -28,3 +28,300 @@ model Response {
 
   @@map("responses")
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Alita / CMAM core models
+// ─────────────────────────────────────────────────────────────────────────
+
+enum Tier {
+  A
+  B
+  C
+}
+
+enum AssessmentType {
+  current_profile
+  target_profile
+}
+
+enum AssessmentStatus {
+  in_progress
+  complete
+}
+
+enum CheckpointType {
+  registration_exemption
+  breach_notification_72h
+}
+
+enum Priority {
+  High
+  Medium
+  Low
+}
+
+enum AssessmentEventType {
+  domain_viewed
+  domain_scored
+}
+
+model Sme {
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now()) @map("created_at")
+  name           String
+  // Section 4.1 self-classification answers, stored individually for auditability.
+  q1Answer       Tier     @map("q1_answer")
+  q2Answer       Tier     @map("q2_answer")
+  q3Answer       Tier     @map("q3_answer")
+  q4Answer       Tier     @map("q4_answer")
+  q5Answer       Tier     @map("q5_answer")
+  tierSuggested  Tier     @map("tier_suggested")
+  tier           Tier
+  tierOverridden Boolean  @default(false) @map("tier_overridden")
+
+  assessments         Assessment[]
+  remediationProgress RemediationProgress[]
+  trainingCompletions TrainingCompletion[]
+
+  @@map("smes")
+}
+
+model Domain {
+  id           String @id
+  label        String
+  nistFunction String @map("nist_function")
+  weight       Float
+  sortOrder    Int    @map("sort_order")
+
+  descriptors         Descriptor[]
+  assessmentScores    AssessmentScore[]
+  actionItems         ActionItem[]
+  remediationGuidance RemediationGuidance[]
+  toolRecommendations ToolRecommendation[]
+  remediationProgress RemediationProgress[]
+  lessons             Lesson[]
+
+  @@map("domains")
+}
+
+model Descriptor {
+  id       String @id @default(uuid())
+  domainId String @map("domain_id")
+  level    Int
+  tier     Tier
+  text     String
+
+  domain Domain @relation(fields: [domainId], references: [id])
+
+  @@unique([domainId, level, tier])
+  @@map("descriptors")
+}
+
+model Assessment {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  smeId     String           @map("sme_id")
+  type      AssessmentType
+  status    AssessmentStatus @default(in_progress)
+
+  sme             Sme               @relation(fields: [smeId], references: [id])
+  scores          AssessmentScore[]
+  dpaCheckpoints  DpaCheckpoint[]
+  compositeResult CompositeResult?
+  actionItems     ActionItem[]
+
+  @@map("assessments")
+}
+
+model AssessmentScore {
+  id           String @id @default(uuid())
+  assessmentId String @map("assessment_id")
+  domainId     String @map("domain_id")
+  level        Int
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  domain     Domain     @relation(fields: [domainId], references: [id])
+
+  @@unique([assessmentId, domainId])
+  @@map("assessment_scores")
+}
+
+model DpaCheckpoint {
+  id             String         @id @default(uuid())
+  assessmentId   String         @map("assessment_id")
+  checkpointType CheckpointType @map("checkpoint_type")
+  status         String
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+
+  @@unique([assessmentId, checkpointType])
+  @@map("dpa_checkpoints")
+}
+
+model CompositeResult {
+  id             String  @id @default(uuid())
+  assessmentId   String  @unique @map("assessment_id")
+  rawComposite   Float   @map("raw_composite")
+  gatedComposite Float   @map("gated_composite")
+  bandLabel      String  @map("band_label")
+  gateApplied    Boolean @map("gate_applied")
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+
+  @@map("composite_results")
+}
+
+model ActionItem {
+  id           String   @id @default(uuid())
+  assessmentId String   @map("assessment_id")
+  domainId     String   @map("domain_id")
+  gapSize      Int      @map("gap_size")
+  priority     Priority
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  domain     Domain     @relation(fields: [domainId], references: [id])
+
+  @@map("action_items")
+}
+
+// Lightweight pilot-testing analytics (brief Phase 10): which domains get viewed vs. actually
+// scored, to spot where SMEs abandon an assessment mid-flow.
+model AssessmentEvent {
+  id           String              @id @default(uuid())
+  createdAt    DateTime            @default(now()) @map("created_at")
+  assessmentId String              @map("assessment_id")
+  eventType    AssessmentEventType @map("event_type")
+  domainId     String?             @map("domain_id")
+
+  @@map("assessment_events")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Post-assessment education & training module
+// ─────────────────────────────────────────────────────────────────────────
+
+enum ContentStatus {
+  draft
+  reviewed
+}
+
+enum ToolType {
+  software
+  template
+  free_service
+}
+
+enum SetupComplexity {
+  none
+  low
+  moderate
+}
+
+enum RemediationStatus {
+  in_progress
+  done
+}
+
+// "What's wrong going from Level N to N+1" and "how to improve" — a second content layer
+// distinct from Descriptor (which describes what each level *looks like*). Derived from the
+// verbatim Annex A descriptor pairs, not invented from scratch. All rows start as draft; the
+// researcher reviews before pilot use, same treatment as Annex A itself.
+model RemediationGuidance {
+  id           String        @id @default(uuid())
+  domainId     String        @map("domain_id")
+  tier         Tier
+  fromLevel    Int           @map("from_level")
+  toLevel      Int           @map("to_level")
+  whatsWrong   String        @map("whats_wrong")
+  howToImprove String        @map("how_to_improve")
+  status       ContentStatus @default(draft)
+
+  domain Domain @relation(fields: [domainId], references: [id])
+
+  @@unique([domainId, tier, fromLevel, toLevel])
+  @@map("remediation_guidance")
+}
+
+model ToolRecommendation {
+  id               String          @id @default(uuid())
+  domainId         String          @map("domain_id")
+  tier             Tier?
+  name             String
+  url              String
+  type             ToolType
+  setupComplexity  SetupComplexity @map("setup_complexity")
+  shortDescription String          @map("short_description")
+  isOpenSource     Boolean         @map("is_open_source")
+
+  domain  Domain   @relation(fields: [domainId], references: [id])
+  lessons Lesson[]
+
+  @@unique([domainId, name])
+  @@map("tool_recommendations")
+}
+
+// Lightweight "mark as done / in progress" state per SME per domain, so a returning user sees
+// what they've already acted on (supports the "ongoing check, not one-time report" framing).
+model RemediationProgress {
+  id        String            @id @default(uuid())
+  smeId     String            @map("sme_id")
+  domainId  String            @map("domain_id")
+  status    RemediationStatus
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  sme    Sme    @relation(fields: [smeId], references: [id])
+  domain Domain @relation(fields: [domainId], references: [id])
+
+  @@unique([smeId, domainId])
+  @@map("remediation_progress")
+}
+
+// Training Hub micro-lessons — tier-registered like Annex A (per-tier content, not a single
+// plain-language version), draft content pending researcher review.
+model Lesson {
+  id                   String        @id @default(uuid())
+  domainId             String        @map("domain_id")
+  tier                 Tier
+  title                String
+  explanation          String
+  example              String
+  toolRecommendationId String?       @map("tool_recommendation_id")
+  status               ContentStatus @default(draft)
+  sortOrder            Int           @map("sort_order")
+
+  domain             Domain               @relation(fields: [domainId], references: [id])
+  toolRecommendation ToolRecommendation?  @relation(fields: [toolRecommendationId], references: [id])
+  quizQuestions      QuizQuestion[]
+  completions        TrainingCompletion[]
+
+  @@unique([domainId, tier, title])
+  @@map("lessons")
+}
+
+model QuizQuestion {
+  id           String @id @default(uuid())
+  lessonId     String @map("lesson_id")
+  question     String
+  options      Json
+  correctIndex Int    @map("correct_index")
+  sortOrder    Int    @map("sort_order")
+
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([lessonId, sortOrder])
+  @@map("quiz_questions")
+}
+
+model TrainingCompletion {
+  id          String   @id @default(uuid())
+  smeId       String   @map("sme_id")
+  lessonId    String   @map("lesson_id")
+  completedAt DateTime @default(now()) @map("completed_at")
+  quizScore   Float    @map("quiz_score")
+
+  sme    Sme    @relation(fields: [smeId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([smeId, lessonId])
+  @@map("training_completions")
+}

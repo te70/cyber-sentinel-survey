@@ -73,20 +73,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Cybersecurity Maturity Survey — Tetrasec" },
+      { title: "Alita — Cybersecurity Maturity Assessment for Nairobi SMEs" },
       {
         name: "description",
         content:
-          "Cybersecurity maturity survey for Nairobi digital-services SMEs. 10-minute, anonymous, Ksh 50 M-Pesa reward.",
+          "Alita is a free cybersecurity maturity self-assessment for Nairobi digital SMEs, grounded in NIST CSF and Kenya's Data Protection Act. Built at USIU-A.",
       },
-      { name: "author", content: "Tetrasec Solutions" },
+      { name: "author", content: "USIU-A" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap",
       },
       { rel: "stylesheet", href: appCss },
     ],

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ToolShell } from "@/components/tools/ToolShell";
 
 export const Route = createFileRoute("/tools/tax")({
-  head: () => ({ meta: [{ title: "VAT Calculator — Tetrasec Tools" }] }),
+  head: () => ({ meta: [{ title: "VAT Calculator — Alita Tools" }] }),
   component: VatCalculator,
 });
 

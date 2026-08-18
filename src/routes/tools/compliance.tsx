@@ -4,7 +4,7 @@ import { ToolShell } from "@/components/tools/ToolShell";
 import { CheckCircle2, XCircle, AlertCircle, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/tools/compliance")({
-  head: () => ({ meta: [{ title: "DPA Compliance Checker — Tetrasec Tools" }] }),
+  head: () => ({ meta: [{ title: "DPA Compliance Checker — Alita Tools" }] }),
   component: DpaChecker,
 });
 
