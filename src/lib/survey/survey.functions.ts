@@ -33,42 +33,70 @@ export const scanWebsite = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ScanSchema.parse(d))
   .handler(async ({ data }) => {
     let url = data.url.trim();
-    if (!url.startsWith("http")) url = `https://${url}`;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = `https://${url}`;
+    }
+
+    async function tryFetch(fetchUrl: string) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20000);
+      try {
+        const res = await fetch(fetchUrl, {
+          method: "GET",
+          signal: controller.signal,
+          redirect: "follow",
+          headers: { "User-Agent": "Mozilla/5.0 TetrasecScanner/1.0 Security-Assessment" },
+        });
+        clearTimeout(timer);
+        if (res.body) res.body.cancel().catch(() => {});
+        return res;
+      } catch (err) {
+        clearTimeout(timer);
+        throw err;
+      }
+    }
+
+    let res: Response | null = null;
+    let lastErr: unknown = null;
 
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 12000);
-      const res = await fetch(url, {
-        method: "HEAD",
-        signal: controller.signal,
-        redirect: "follow",
-      });
-      clearTimeout(timer);
+      res = await tryFetch(url);
+    } catch (err) {
+      lastErr = err;
+      // If bare domain fails, retry with www. prefix
+      try {
+        const urlObj = new URL(url);
+        if (!urlObj.hostname.startsWith("www.")) {
+          res = await tryFetch(`${urlObj.protocol}//www.${urlObj.hostname}${urlObj.pathname}${urlObj.search}`);
+        }
+      } catch { /* use lastErr */ }
+    }
 
-      const h = Object.fromEntries(res.headers.entries());
-      const finalHttps = res.url.startsWith("https://");
-
-      const checks: Record<string, { name: string; pass: boolean; description: string }> = {
-        https:       { name: "HTTPS Encryption",        pass: finalHttps,                                         description: "All traffic is encrypted between visitors and your website." },
-        hsts:        { name: "Force HTTPS (HSTS)",       pass: !!h["strict-transport-security"],                  description: "Browsers are told to always use HTTPS, preventing downgrade attacks." },
-        xframe:      { name: "Clickjacking Protection",  pass: !!h["x-frame-options"] || !!h["content-security-policy"], description: "Your site cannot be embedded in another page to trick your visitors." },
-        xcontent:    { name: "Content Type Security",    pass: !!h["x-content-type-options"],                     description: "Browsers won't misinterpret files, preventing certain injection attacks." },
-        csp:         { name: "Content Security Policy",  pass: !!h["content-security-policy"],                    description: "Controls what scripts and resources can load on your site." },
-        referrer:    { name: "Referrer Policy",          pass: !!h["referrer-policy"],                            description: "Controls what URL information is shared when visitors click links." },
-        permissions: { name: "Permissions Policy",       pass: !!h["permissions-policy"] || !!h["feature-policy"], description: "Restricts browser features like camera, microphone, and location." },
-      };
-
-      const passCount = Object.values(checks).filter((c) => c.pass).length;
-      const score = Math.round((passCount / Object.keys(checks).length) * 100);
-
-      return { ok: true as const, checks, score, finalUrl: res.url, statusCode: res.status };
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error && err.name === "AbortError"
-          ? "The website took too long to respond."
-          : "Could not reach the website. Please check the URL and try again.";
+    if (!res) {
+      const err = lastErr instanceof Error ? lastErr : null;
+      const msg = err?.name === "AbortError"
+        ? "The website took too long to respond (20s). It may be slow or temporarily offline."
+        : "Could not reach the website. Please check the URL and try again.";
       return { ok: false as const, error: msg };
     }
+
+    const h = Object.fromEntries(res.headers.entries());
+    const finalHttps = res.url.startsWith("https://");
+
+    const checks: Record<string, { name: string; pass: boolean; description: string }> = {
+      https:       { name: "HTTPS Encryption",        pass: finalHttps,                                                description: "All traffic is encrypted between visitors and your website." },
+      hsts:        { name: "Force HTTPS (HSTS)",       pass: !!h["strict-transport-security"],                         description: "Browsers are told to always use HTTPS, preventing downgrade attacks." },
+      xframe:      { name: "Clickjacking Protection",  pass: !!h["x-frame-options"] || !!h["content-security-policy"], description: "Your site cannot be embedded in another page to trick your visitors." },
+      xcontent:    { name: "Content Type Security",    pass: !!h["x-content-type-options"],                            description: "Browsers won't misinterpret files, preventing certain injection attacks." },
+      csp:         { name: "Content Security Policy",  pass: !!h["content-security-policy"],                           description: "Controls what scripts and resources can load on your site." },
+      referrer:    { name: "Referrer Policy",          pass: !!h["referrer-policy"],                                   description: "Controls what URL information is shared when visitors click links." },
+      permissions: { name: "Permissions Policy",       pass: !!h["permissions-policy"] || !!h["feature-policy"],       description: "Restricts browser features like camera, microphone, and location." },
+    };
+
+    const passCount = Object.values(checks).filter((c) => c.pass).length;
+    const score = Math.round((passCount / Object.keys(checks).length) * 100);
+
+    return { ok: true as const, checks, score, finalUrl: res.url, statusCode: res.status };
   });
 
 // ---------- Screening ----------
@@ -208,12 +236,32 @@ export const completeSurvey = createServerFn({ method: "POST" })
     try {
       const { db } = await import("@/lib/db");
       const { Prisma } = await import("@prisma/client");
+
+      // Read existing section data so we never overwrite good DB data with
+      // empty localStorage fallbacks passed from the client.
+      const existing = await db.response.findUnique({
+        where: { id: session.rid },
+        select: { sectionA: true, sectionB: true, sectionC: true },
+      });
+
+      const isEmpty = (v: unknown) =>
+        v == null || (typeof v === "object" && Object.keys(v as object).length === 0);
+
+      const resolveSection = (
+        dbVal: unknown,
+        clientVal?: Record<string, unknown>,
+      ): object => {
+        if (!isEmpty(dbVal)) return dbVal as object;
+        if (clientVal && !isEmpty(clientVal)) return clientVal as object;
+        return Prisma.DbNull as unknown as object;
+      };
+
       await db.response.update({
         where: { id: session.rid },
         data: {
-          sectionA: (data.section_a ?? Prisma.DbNull) as object,
-          sectionB: (data.section_b ?? Prisma.DbNull) as object,
-          sectionC: (data.section_c ?? Prisma.DbNull) as object,
+          sectionA: resolveSection(existing?.sectionA, data.section_a),
+          sectionB: resolveSection(existing?.sectionB, data.section_b),
+          sectionC: resolveSection(existing?.sectionC, data.section_c),
           sectionD: data.section_d as object,
           completed: true,
           completedAt: new Date(),
@@ -223,10 +271,33 @@ export const completeSurvey = createServerFn({ method: "POST" })
       console.error("[completeSurvey] DB error:", err);
     }
 
-    deleteCookie(SESSION_COOKIE, { path: "/" });
-
     return { ok: true as const };
   });
+
+// ---------- Report data (call once from report page; deletes session) ----------
+export const getReportData = createServerFn({ method: "GET" }).handler(async () => {
+  const { verifySession } = await import("./session.server");
+  const token = getCookie(SESSION_COOKIE);
+  const session = verifySession(token);
+  if (!session) return { ok: false as const };
+
+  try {
+    const { db } = await import("@/lib/db");
+    const row = await db.response.findUnique({
+      where: { id: session.rid },
+      select: { sectionB: true, sectionC: true },
+    });
+    deleteCookie(SESSION_COOKIE, { path: "/" });
+    return {
+      ok: true as const,
+      sectionB: (row?.sectionB ?? null) as Record<string, string> | null,
+      sectionC: (row?.sectionC ?? null) as Record<string, string> | null,
+    };
+  } catch {
+    deleteCookie(SESSION_COOKIE, { path: "/" });
+    return { ok: false as const };
+  }
+});
 
 // ---------- Resume helper ----------
 export const getSessionInfo = createServerFn({ method: "GET" }).handler(async () => {

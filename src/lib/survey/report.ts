@@ -3,6 +3,7 @@
 
 export interface QuestionRec {
   gap: string;
+  strength?: string; // explicit strength label; if absent, derived from gap by replacing "^No " → "Has "
   risk: string;
   recommendation: string;
   tetrasecService: string;
@@ -19,6 +20,7 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B1_2: {
     gap: "Leadership does not prioritise cybersecurity",
+    strength: "Leadership actively prioritises cybersecurity",
     risk: "Without leadership buy-in, security budgets get cut and staff don't take it seriously. The tone at the top sets the tone everywhere else.",
     recommendation: "Schedule a 30-minute 'cyber risk' conversation with your leadership team. Ask: what would happen to our business if we lost access to our systems for a week?",
     tetrasecService: "Tetrasec Executive Briefing — a structured risk conversation for business owners and directors.",
@@ -31,18 +33,21 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B1_4: {
     gap: "New tools adopted without a security check",
+    strength: "Security check done before adopting any new tool or platform",
     risk: "New apps and platforms are a very common entry point for attackers. A tool with weak security can expose all the data it touches.",
     recommendation: "Before adopting any new platform, answer three questions: Does it encrypt data? Does it have a privacy policy? Has it had any publicised data breaches?",
     tetrasecService: "Tetrasec Tool Vetting — a quick security review of apps and platforms before you commit.",
   },
   B1_5: {
     gap: "Security rules are never reviewed or updated",
+    strength: "Security rules reviewed and updated at least once a year",
     risk: "Outdated policies create false confidence. Staff follow rules that no longer reflect how the business actually operates.",
     recommendation: "Set a December calendar reminder to review your security rules each year. A review should take less than one hour.",
     tetrasecService: "Tetrasec Annual Security Review — structured yearly assessment with a clear action plan.",
   },
   B1_6: {
     gap: "Not compliant with Kenya Data Protection Act 2019",
+    strength: "Kenya DPA 2019 compliance in place",
     risk: "The Kenya DPA 2019 requires businesses handling personal data to register with the ODPC and follow data handling rules. Non-compliance can result in fines of up to KSh 5 million.",
     recommendation: "Check whether your business must register as a Data Controller at odpc.go.ke. Start with a Data Register — a list of what personal data you hold and why.",
     tetrasecService: "Tetrasec DPA Compliance Package — ODPC registration support and data register setup for SMEs.",
@@ -62,6 +67,7 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B2_3: {
     gap: "Third-party suppliers not checked for security",
+    strength: "Third-party suppliers checked for security before working with them",
     risk: "Many Kenyan business breaches happen through a supplier, contractor, or developer — not through the business directly. Their weak security becomes your problem.",
     recommendation: "For your next contractor, ask three questions: Do you have a written security policy? Have you had any data breaches? How do you protect the data we share with you?",
     tetrasecService: "Tetrasec Supplier Security Review — questionnaire and assessment for your key third-party partners.",
@@ -74,6 +80,7 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B2_5: {
     gap: "Security not part of business planning",
+    strength: "Security risk management integrated into business planning and budgets",
     risk: "When security is treated as an IT issue rather than a business issue, it gets underfunded and becomes reactive — only addressed after an incident.",
     recommendation: "Add a 'security budget' line to your annual business plan — even if it starts at KSh 50,000. Having a number forces the conversation with your team.",
     tetrasecService: "Tetrasec Strategy Alignment — integrating security planning into your business planning and budgeting cycle.",
@@ -93,6 +100,7 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B3_2: {
     gap: "Staff have broader access than their job requires",
+    strength: "Least-privilege access in place — staff only access what their role requires",
     risk: "When everyone has access to everything, one compromised account exposes the whole business. Account takeovers on shared platforms — social media, cloud drives, email — are far more damaging when access isn't limited.",
     recommendation: "Decide which tools and accounts each person genuinely needs. Remove admin rights from anyone who doesn't use them. On social media, use the 'team member' role rather than sharing the admin password.",
     tetrasecService: "Tetrasec Access Audit — a review of who has access to what, with a clean-up plan tailored to your business.",
@@ -117,6 +125,7 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B3_6: {
     gap: "Same password used across multiple accounts",
+    strength: "Unique passwords used for every account — no password reuse",
     risk: "Password reuse is the most common reason Kenyan SME accounts get taken over. One leaked password — from any site your staff use — can unlock every account that shares it.",
     recommendation: "Adopt a free password manager such as Bitwarden or Google Password Manager. Make it a business rule: every account gets its own unique password stored in the manager.",
     tetrasecService: "Tetrasec Password Security Rollout — password manager setup and a short team briefing on why it matters.",
@@ -136,18 +145,21 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B4_3: {
     gap: "Staff do not know how to report security issues",
+    strength: "Staff know who to contact and what to do when they spot a security issue",
     risk: "Staff often notice suspicious activity but do not know whether to report it or fear being blamed. This delay in reporting is expensive — every hour matters in a breach.",
     recommendation: "Post a simple notice in your office and team WhatsApp: 'If something looks wrong, call [name] immediately. No blame — just report it.'",
     tetrasecService: "Tetrasec Security Culture Workshop — building a report-first security culture across your team.",
   },
   B4_4: {
     gap: "Incident response plan never tested",
+    strength: "Incident response plan tested through a drill or practice run",
     risk: "A plan that has never been practised will fail when it matters most. Response teams freeze, steps are unclear, and key contacts turn out to be unavailable.",
     recommendation: "Run a 30-minute tabletop exercise with your team: imagine your email was hacked — what do you do first? Who calls who? Write down what you discover.",
     tetrasecService: "Tetrasec Tabletop Exercise — a guided cyber incident simulation for your leadership team.",
   },
   B4_5: {
     gap: "Security incidents not reported to relevant authorities",
+    strength: "Security incidents reported to the ODPC and relevant Kenyan authorities",
     risk: "Under the Kenya DPA 2019, personal data breaches must be reported to the ODPC within 72 hours. Failure to report is a regulatory offence with financial penalties.",
     recommendation: "Know your obligations: customer data breaches go to the ODPC at odpc.go.ke. Financial fraud should be reported to your bank and the DCI Cybercrime Unit.",
     tetrasecService: "Tetrasec Regulatory Reporting Support — guided breach notification to the ODPC and relevant Kenyan authorities.",
@@ -167,6 +179,7 @@ export const B_RECS: Record<string, QuestionRec> = {
   },
   B5_2: {
     gap: "Backups have never been tested for restoration",
+    strength: "Backups tested and verified — confirmed they can actually be restored",
     risk: "Many businesses discover their backups are corrupted or incomplete only during a crisis. An untested backup is not really a backup.",
     recommendation: "Once per quarter, restore one file from your backup and verify that it works and is current. This takes five minutes and could save your entire business.",
     tetrasecService: "Tetrasec Backup Integrity Testing — scheduled verification that your backups actually work when you need them.",
@@ -198,30 +211,35 @@ export const B_RECS: Record<string, QuestionRec> = {
   // ── B6 Staff Knowledge and Awareness ────────────────────────────────────
   B6_1: {
     gap: "Staff cannot identify phishing, scam messages, or suspicious calls",
+    strength: "Staff can identify phishing emails, WhatsApp scams, and suspicious calls",
     risk: "Most attacks on Kenyan SMEs start with a fake message or call. If staff cannot spot a phishing email, a WhatsApp scam, or an impersonation call, one click can compromise the whole business.",
     recommendation: "Show your team three real examples of Kenyan scam messages — fake M-Pesa alerts, impersonation emails, suspicious WhatsApp messages. Point out the signs: urgency, requests for passwords, wrong sender details.",
     tetrasecService: "Tetrasec Phishing Awareness Programme — interactive training built around attack examples your team will recognise from everyday life in Nairobi.",
   },
   B6_2: {
     gap: "Staff do not know the M-Pesa STK push safety rule",
+    strength: "Staff know the M-Pesa STK push rule — decline any prompt you did not initiate",
     risk: "M-Pesa STK push fraud is experienced regularly by Nairobi SMEs. Attackers trigger payment prompts and pressure staff to confirm. Staff who do not know the rule — 'decline any prompt you did not initiate' — accidentally authorise real payments to fraudsters.",
     recommendation: "Tell every staff member who handles M-Pesa the rule: if you did not initiate the STK push, decline it immediately and report it — even if someone on the phone says it is a test or an error. Post this rule in your office and team WhatsApp.",
     tetrasecService: "Tetrasec M-Pesa Fraud Briefing — a 30-minute session covering M-Pesa attack patterns and the practical rules to follow.",
   },
   B6_3: {
     gap: "New staff are not told about security risks when they join",
+    strength: "New staff and freelancers receive a security briefing on joining",
     risk: "New staff and freelancers are the most likely to fall for social engineering. They do not yet know what is normal — so they cannot spot what is abnormal. One uninformed new hire can be the entry point for a serious incident.",
     recommendation: "Add a 20-minute security talk to your onboarding — even informally. Cover: the company password rules, how to spot a fake message, who to call if something looks wrong, and the M-Pesa STK push rule.",
     tetrasecService: "Tetrasec Onboarding Security Kit — a short, reusable security briefing you can give every new team member from day one.",
   },
   B6_4: {
     gap: "Cybersecurity has never been discussed as a team",
+    strength: "Cybersecurity discussed as a team at least once in the past 12 months",
     risk: "If security is never talked about, staff assume someone else is responsible — or that it is not a real concern for a business their size. This silence is how small incidents escalate into serious ones.",
     recommendation: "Spend 15 minutes at your next team meeting discussing one real scenario: what would you do if our Instagram was hacked tomorrow? Who would you call? What would we lose? This conversation alone raises awareness more than most formal training.",
     tetrasecService: "Tetrasec Security Culture Workshop — a facilitated 90-minute team session that opens the conversation around cyber risk in plain language.",
   },
   B6_5: {
     gap: "Staff may share passwords or PINs when pressured",
+    strength: "Staff know not to share passwords, PINs, or M-Pesa codes — even under pressure",
     risk: "Social engineering — where attackers pretend to be from Safaricom, a bank, or IT support — is one of the most effective ways to steal credentials. Staff who share passwords or M-Pesa PINs under pressure have unwittingly enabled some of the most costly SME fraud cases in Kenya.",
     recommendation: "Make this a firm rule, communicated to everyone: never share a password, M-Pesa PIN, or confirmation code with anyone — including someone claiming to be from Safaricom, your bank, or IT support. Legitimate services will never ask for these.",
     tetrasecService: "Tetrasec Social Engineering Awareness — training on how impersonation attacks work and what to say when someone asks for your credentials.",

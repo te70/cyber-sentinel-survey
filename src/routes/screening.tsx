@@ -178,9 +178,9 @@ function Screening() {
         }));
         navigate({ to: "/survey" });
       } else if (res.reason === "duplicate") {
-        setServerErr("Our records show this number has already completed the survey. Each participant may respond once. Thank you for your interest.");
+        setServerErr("Thank you for your interest. You are not qualified.");
       } else if (res.reason === "ineligible") {
-        setServerErr("Thank you for your interest. Based on your answers, this study is looking for a different respondent profile. We appreciate your time.");
+        setServerErr("Thank you for your interest. You are not qualified.");
       } else {
         setServerErr("Something went wrong. Please try again.");
       }

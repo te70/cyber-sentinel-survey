@@ -73,10 +73,10 @@ function SectionDPage() {
             section_d: data as Record<string, unknown>,
           },
         });
-        if (res.ok) navigate({ to: "/surveys/complete" });
-        else navigate({ to: "/surveys/complete" });
+        if (res.ok) navigate({ to: "/surveys/report" });
+        else navigate({ to: "/surveys/report" });
       } catch {
-        navigate({ to: "/surveys/complete" });
+        navigate({ to: "/surveys/report" });
       } finally {
         setBusy(false);
       }

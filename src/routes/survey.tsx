@@ -157,7 +157,7 @@ function SurveyPage() {
           return;
         }
         if (res.completed) {
-          navigate({ to: "/complete" });
+          navigate({ to: "/surveys/report" });
           return;
         }
         if (res.saved.a) setA(res.saved.a as SectionA);
@@ -278,7 +278,7 @@ function SurveyPage() {
       } else if (step === 9) {
         const res = await complete({ data: { section_d: d as Record<string, unknown> } });
         if (res.ok) {
-          navigate({ to: "/complete" });
+          navigate({ to: "/surveys/report" });
           return;
         }
         setServerErr("Couldn't submit. Please try again.");

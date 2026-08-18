@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SurveyRouteImport } from './routes/survey'
 import { Route as ScreeningRouteImport } from './routes/screening'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as CompleteRouteImport } from './routes/complete'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,7 +28,6 @@ import { Route as SurveysReportRouteImport } from './routes/surveys/report'
 import { Route as SurveysOtpRouteImport } from './routes/surveys/otp'
 import { Route as SurveysEligibilityRouteImport } from './routes/surveys/eligibility'
 import { Route as SurveysDashboardRouteImport } from './routes/surveys/dashboard'
-import { Route as SurveysCompleteRouteImport } from './routes/surveys/complete'
 import { Route as SurveysAdminExportRouteImport } from './routes/surveys-admin/export'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -46,11 +44,6 @@ const ScreeningRoute = ScreeningRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompleteRoute = CompleteRouteImport.update({
-  id: '/complete',
-  path: '/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -132,11 +125,6 @@ const SurveysDashboardRoute = SurveysDashboardRouteImport.update({
   path: '/surveys/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SurveysCompleteRoute = SurveysCompleteRouteImport.update({
-  id: '/surveys/complete',
-  path: '/surveys/complete',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SurveysAdminExportRoute = SurveysAdminExportRouteImport.update({
   id: '/surveys-admin/export',
   path: '/surveys-admin/export',
@@ -151,13 +139,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/complete': typeof CompleteRoute
   '/how-it-works': typeof HowItWorksRoute
   '/screening': typeof ScreeningRoute
   '/survey': typeof SurveyRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/surveys-admin/export': typeof SurveysAdminExportRoute
-  '/surveys/complete': typeof SurveysCompleteRoute
   '/surveys/dashboard': typeof SurveysDashboardRoute
   '/surveys/eligibility': typeof SurveysEligibilityRoute
   '/surveys/otp': typeof SurveysOtpRoute
@@ -175,13 +161,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/complete': typeof CompleteRoute
   '/how-it-works': typeof HowItWorksRoute
   '/screening': typeof ScreeningRoute
   '/survey': typeof SurveyRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/surveys-admin/export': typeof SurveysAdminExportRoute
-  '/surveys/complete': typeof SurveysCompleteRoute
   '/surveys/dashboard': typeof SurveysDashboardRoute
   '/surveys/eligibility': typeof SurveysEligibilityRoute
   '/surveys/otp': typeof SurveysOtpRoute
@@ -201,13 +185,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/complete': typeof CompleteRoute
   '/how-it-works': typeof HowItWorksRoute
   '/screening': typeof ScreeningRoute
   '/survey': typeof SurveyRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/surveys-admin/export': typeof SurveysAdminExportRoute
-  '/surveys/complete': typeof SurveysCompleteRoute
   '/surveys/dashboard': typeof SurveysDashboardRoute
   '/surveys/eligibility': typeof SurveysEligibilityRoute
   '/surveys/otp': typeof SurveysOtpRoute
@@ -227,13 +209,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/complete'
     | '/how-it-works'
     | '/screening'
     | '/survey'
     | '/admin'
     | '/surveys-admin/export'
-    | '/surveys/complete'
     | '/surveys/dashboard'
     | '/surveys/eligibility'
     | '/surveys/otp'
@@ -251,13 +231,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/complete'
     | '/how-it-works'
     | '/screening'
     | '/survey'
     | '/admin'
     | '/surveys-admin/export'
-    | '/surveys/complete'
     | '/surveys/dashboard'
     | '/surveys/eligibility'
     | '/surveys/otp'
@@ -276,13 +254,11 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/complete'
     | '/how-it-works'
     | '/screening'
     | '/survey'
     | '/_authenticated/admin'
     | '/surveys-admin/export'
-    | '/surveys/complete'
     | '/surveys/dashboard'
     | '/surveys/eligibility'
     | '/surveys/otp'
@@ -302,12 +278,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  CompleteRoute: typeof CompleteRoute
   HowItWorksRoute: typeof HowItWorksRoute
   ScreeningRoute: typeof ScreeningRoute
   SurveyRoute: typeof SurveyRoute
   SurveysAdminExportRoute: typeof SurveysAdminExportRoute
-  SurveysCompleteRoute: typeof SurveysCompleteRoute
   SurveysDashboardRoute: typeof SurveysDashboardRoute
   SurveysEligibilityRoute: typeof SurveysEligibilityRoute
   SurveysOtpRoute: typeof SurveysOtpRoute
@@ -344,13 +318,6 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/complete': {
-      id: '/complete'
-      path: '/complete'
-      fullPath: '/complete'
-      preLoaderRoute: typeof CompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -465,13 +432,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SurveysDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/surveys/complete': {
-      id: '/surveys/complete'
-      path: '/surveys/complete'
-      fullPath: '/surveys/complete'
-      preLoaderRoute: typeof SurveysCompleteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/surveys-admin/export': {
       id: '/surveys-admin/export'
       path: '/surveys-admin/export'
@@ -504,12 +464,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  CompleteRoute: CompleteRoute,
   HowItWorksRoute: HowItWorksRoute,
   ScreeningRoute: ScreeningRoute,
   SurveyRoute: SurveyRoute,
   SurveysAdminExportRoute: SurveysAdminExportRoute,
-  SurveysCompleteRoute: SurveysCompleteRoute,
   SurveysDashboardRoute: SurveysDashboardRoute,
   SurveysEligibilityRoute: SurveysEligibilityRoute,
   SurveysOtpRoute: SurveysOtpRoute,

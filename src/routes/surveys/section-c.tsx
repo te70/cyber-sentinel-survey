@@ -97,12 +97,16 @@ function SectionCPage() {
                 {blk.title}
               </h2>
               <p className="mb-5 text-sm text-[var(--ts-text-secondary)]" style={{ fontFamily: "var(--ts-font-body)" }}>
-                Does each statement apply as a barrier to improving cybersecurity in your business?
+                {prefix === "C3"
+                  ? "Does each statement describe your experience with this check-up?"
+                  : "Does each statement apply as a barrier to improving cybersecurity in your business?"}
               </p>
               <div className="space-y-4">
                 {blk.items.map((item, i) => {
                   const key = `${prefix}_${i + 1}`;
                   const val = data[key];
+                  const yesLabel = prefix === "C3" ? "Yes, this applies" : "Yes, this is a barrier";
+                  const noLabel  = prefix === "C3" ? "No, this does not apply" : "No, not a barrier";
                   return (
                     <div key={key} className="rounded-xl border bg-white p-4 space-y-3">
                       <p className="text-sm text-[var(--ts-text-primary)]" style={{ fontFamily: "var(--ts-font-body)" }}>{item}</p>
@@ -115,7 +119,7 @@ function SectionCPage() {
                               ? "border-2 border-amber-400 bg-amber-50 text-amber-700"
                               : "border border-[var(--ts-border)] bg-[var(--ts-surface)] text-[var(--ts-text-body)] hover:border-amber-300"].join(" ")}
                           style={{ fontFamily: "var(--ts-font-body)" }}
-                        >Yes, this is a barrier</button>
+                        >{yesLabel}</button>
                         <button
                           type="button"
                           onClick={() => update({ ...data, [key]: "no" })}
@@ -124,7 +128,7 @@ function SectionCPage() {
                               ? "border-2 border-[var(--ts-teal)] bg-[var(--ts-teal-ghost)] text-[var(--ts-teal)]"
                               : "border border-[var(--ts-border)] bg-[var(--ts-surface)] text-[var(--ts-text-body)] hover:border-[var(--ts-teal-dim)]"].join(" ")}
                           style={{ fontFamily: "var(--ts-font-body)" }}
-                        >No, not a barrier</button>
+                        >{noLabel}</button>
                       </div>
                     </div>
                   );
