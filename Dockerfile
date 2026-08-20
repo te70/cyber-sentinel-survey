@@ -30,6 +30,10 @@ COPY --from=build /app/node_modules ./node_modules
 RUN npx playwright install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/dist ./dist
+# `npm run db:seed` runs prisma/seed.ts via tsx at runtime (not bundled into dist/), and it
+# imports directly from src/ (e.g. src/lib/alita/domains, src/lib/researcher-password.server) —
+# without this, seeding fails with ERR_MODULE_NOT_FOUND since src/ was never in the image.
+COPY --from=build /app/src ./src
 COPY --from=build /app/prisma ./prisma
 # prisma.config.ts lives at the project root (not inside ./prisma) and is what wires
 # process.env.DATABASE_URL into Prisma's config at all — without it, `prisma db push`/`generate`
