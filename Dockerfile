@@ -11,11 +11,7 @@ WORKDIR /app
 # lockfile with a spurious "missing lru-cache" error). Pinning npm avoids the mismatch entirely.
 RUN npm install -g npm@11.11.0
 COPY package.json package-lock.json ./
-# Cache mount persists npm's download cache across builds (this and Railway's own build
-# infrastructure both support BuildKit cache mounts) — without it, any network hiccup mid-install
-# means the next build attempt re-downloads everything instead of resuming from cache.
-RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
-    npm config set fetch-retries 5 fetch-retry-mintimeout 20000 fetch-timeout 300000 \
+RUN npm config set fetch-retries 5 fetch-retry-mintimeout 20000 fetch-timeout 300000 \
     && npm ci
 
 FROM deps AS build
