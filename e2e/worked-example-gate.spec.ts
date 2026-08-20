@@ -1,11 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { CLASSIFICATION_QUESTIONS } from "../src/lib/alita/classification";
 import { DOMAINS, type DomainId } from "../src/lib/alita/domains";
-import { waitForHydration } from "./helpers";
+import { answerDomainToLevel, completeIntake, waitForHydration } from "./helpers";
 
-// Scenario 2 (brief Phase 9): submit the Section 10.1 worked-example scores through the real
-// UI and confirm the results screen shows band "Initial" with the gate-explanation note,
-// alongside the ungated per-domain radar chart (all six domain levels rendered as scored).
+// Scenario 2 (brief Phase 9, re-run through the item battery per the follow-up brief's Phase
+// 8): produce the Section 10.1 worked-example scores through the real multi-item assessment
+// UI — not a directly-injected score — and confirm the results screen shows band "Initial"
+// with the gate-explanation note, alongside the ungated per-domain radar chart. This proves the
+// cumulative item-battery pipeline reproduces the same regression-tested output the original
+// direct-injection version already confirmed.
 
 const WORKED_EXAMPLE_LEVELS: Record<DomainId, number> = {
   D1: 4,
@@ -16,30 +18,18 @@ const WORKED_EXAMPLE_LEVELS: Record<DomainId, number> = {
   D6: 3,
 };
 
-test("Section 10.1 worked example -> Initial band with gate note", async ({ page }) => {
-  test.setTimeout(60_000);
+test("Section 10.1 worked example, via the item battery -> Initial band with gate note", async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
   await page.goto("/alita/start");
   await waitForHydration(page);
-  await page.getByLabel("Business name").fill("Worked Example Business");
-
-  for (const q of CLASSIFICATION_QUESTIONS) {
-    await page.locator(`#${q.id}-A`).click();
-  }
-  await page.getByRole("checkbox").click();
-  await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Start my assessment" }).click();
-  await page.waitForURL(/\/alita\/assessment\//);
+  await completeIntake(page, { businessName: "Worked Example Business" });
 
   for (let i = 0; i < DOMAINS.length; i++) {
     const domain = DOMAINS[i];
-    const level = WORKED_EXAMPLE_LEVELS[domain.id];
-    const option = page.getByTestId(`level-option-${level}`);
-    await option.waitFor({ state: "visible" });
-    await option.click();
-    const isLast = i === DOMAINS.length - 1;
-    const nextButton = page.getByRole("button", { name: isLast ? "Finish" : "Next" });
-    await expect(nextButton).toBeEnabled();
-    await nextButton.click();
+    const isLastDomain = i === DOMAINS.length - 1;
+    await answerDomainToLevel(page, WORKED_EXAMPLE_LEVELS[domain.id], isLastDomain);
   }
 
   await page.waitForURL(/\/alita\/results\//);

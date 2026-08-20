@@ -82,8 +82,62 @@ model Sme {
   assessments         Assessment[]
   remediationProgress RemediationProgress[]
   trainingCompletions TrainingCompletion[]
+  consentRecords      ConsentRecord[]
+  pseudonym           SmePseudonym?
 
   @@map("smes")
+}
+
+enum ConsentType {
+  privacy_notice
+  research_participation
+}
+
+// Append-only: revoking sets revokedAt on the active row rather than deleting it, since the
+// history is itself a compliance record.
+model ConsentRecord {
+  id          String      @id @default(uuid())
+  smeId       String      @map("sme_id")
+  consentType ConsentType @map("consent_type")
+  version     String
+  grantedAt   DateTime    @default(now()) @map("granted_at")
+  revokedAt   DateTime?   @map("revoked_at")
+
+  sme Sme @relation(fields: [smeId], references: [id])
+
+  @@map("consent_records")
+}
+
+// The one record that survives an account deletion — no FK to Sme, since that row will be gone.
+model DeletionLog {
+  id          String   @id @default(uuid())
+  smeId       String   @map("sme_id")
+  requestedAt DateTime @default(now()) @map("requested_at")
+
+  @@map("deletion_log")
+}
+
+// Stable pseudonym per SME for researcher exports, assigned lazily on first export. Kept in its
+// own table, tightly scoped to export generation — never written into the exported workbook.
+model SmePseudonym {
+  id         String   @id @default(uuid())
+  smeId      String   @unique @map("sme_id")
+  pseudonym  String   @unique
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  sme Sme @relation(fields: [smeId], references: [id])
+
+  @@map("sme_pseudonyms")
+}
+
+// Minimal single-credential researcher access for the bulk export — not a general auth system.
+model Researcher {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("researchers")
 }
 
 model Domain {
@@ -100,6 +154,7 @@ model Domain {
   toolRecommendations ToolRecommendation[]
   remediationProgress RemediationProgress[]
   lessons             Lesson[]
+  assessmentItems     AssessmentItem[]
 
   @@map("domains")
 }
@@ -129,15 +184,21 @@ model Assessment {
   dpaCheckpoints  DpaCheckpoint[]
   compositeResult CompositeResult?
   actionItems     ActionItem[]
+  itemResponses   ItemResponse[]
 
   @@map("assessments")
 }
 
 model AssessmentScore {
-  id           String @id @default(uuid())
-  assessmentId String @map("assessment_id")
-  domainId     String @map("domain_id")
-  level        Int
+  id            String @id @default(uuid())
+  assessmentId  String @map("assessment_id")
+  domainId      String @map("domain_id")
+  level         Int
+  // Bottom-up cumulative score from the item battery, populated only for Current Profile
+  // assessments scored via the item battery. Null for Target Profile (single-pick, no battery).
+  // `level` above is the confirmed value fed downstream — this column is for the internal
+  // consistency check (Section 12.2), not a replacement for `level`.
+  computedLevel Int?   @map("computed_level")
 
   assessment Assessment @relation(fields: [assessmentId], references: [id])
   domain     Domain     @relation(fields: [domainId], references: [id])
@@ -278,16 +339,37 @@ model RemediationProgress {
 
 // Training Hub micro-lessons — tier-registered like Annex A (per-tier content, not a single
 // plain-language version), draft content pending researcher review.
+enum LessonAudience {
+  owner
+  staff
+  both
+}
+
 model Lesson {
-  id                   String        @id @default(uuid())
-  domainId             String        @map("domain_id")
+  id                   String         @id @default(uuid())
+  domainId             String         @map("domain_id")
   tier                 Tier
   title                String
   explanation          String
   example              String
-  toolRecommendationId String?       @map("tool_recommendation_id")
-  status               ContentStatus @default(draft)
-  sortOrder            Int           @map("sort_order")
+  toolRecommendationId String?        @map("tool_recommendation_id")
+  status               ContentStatus  @default(draft)
+  sortOrder            Int            @map("sort_order")
+  // Higher surfaces first as the remediation-guidance "Learn more" pick (see
+  // pickLessonForDomain in remediation.functions.ts) — not just position in the general library.
+  priority             Int            @default(0)
+  // Content targeting only — Alita has no per-user accounts, so this drives a Training Hub
+  // filter toggle, not real access control.
+  audience             LessonAudience @default(both)
+  // Traceability back to the specific Annex A descriptor (domain/level/tier) or Section 9
+  // local-risk row this lesson is drawn from — Section 12.1's content-validity requirement.
+  sourceRef            String         @default("") @map("source_ref")
+  // Flags content whose accuracy depends on external UI that changes over time (e.g. the D3
+  // platform-specific MFA walkthroughs — WhatsApp/Instagram/Gmail's own menus drift, and a stale
+  // screenshot-based walkthrough actively misleads rather than just aging gracefully). No admin
+  // UI exists yet to act on this — it's a researcher-facing flag/query target for now.
+  needsPeriodicReview  Boolean        @default(false) @map("needs_periodic_review")
+  contentReviewedAt    DateTime?      @map("content_reviewed_at")
 
   domain             Domain               @relation(fields: [domainId], references: [id])
   toolRecommendation ToolRecommendation?  @relation(fields: [toolRecommendationId], references: [id])
@@ -324,4 +406,43 @@ model TrainingCompletion {
 
   @@unique([smeId, lessonId])
   @@map("training_completions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Multi-item domain assessment battery (Current Profile only — Guttman-style cumulative scoring)
+// ─────────────────────────────────────────────────────────────────────────
+
+// A short, single-claim, agree/disagree statement operationalising one level (1-5) of a
+// domain's Annex A descriptor, in one tier's register. Level 0 has no item — it's the default
+// when nothing is endorsed. Draft content pending researcher review, same as every other
+// content set in this project.
+model AssessmentItem {
+  id                  String        @id @default(uuid())
+  domainId            String        @map("domain_id")
+  tier                Tier
+  level               Int
+  statementText       String        @map("statement_text")
+  sourceDescriptorRef String        @map("source_descriptor_ref")
+  order               Int           @default(1)
+  status              ContentStatus @default(draft)
+
+  domain    Domain         @relation(fields: [domainId], references: [id])
+  responses ItemResponse[]
+
+  @@unique([domainId, tier, level, order])
+  @@map("assessment_items")
+}
+
+model ItemResponse {
+  id            String   @id @default(uuid())
+  assessmentId  String   @map("assessment_id")
+  itemId        String   @map("item_id")
+  responseValue Int      @map("response_value")
+  answeredAt    DateTime @default(now()) @map("answered_at")
+
+  assessment Assessment     @relation(fields: [assessmentId], references: [id])
+  item       AssessmentItem @relation(fields: [itemId], references: [id])
+
+  @@unique([assessmentId, itemId])
+  @@map("item_responses")
 }

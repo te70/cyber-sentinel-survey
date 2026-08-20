@@ -1,24 +1,42 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { PrismaClient } from "@prisma/client";
 import { DOMAIN_IDS, type DomainId } from "./domains";
 
 const TierSchema = z.enum(["A", "B", "C"]);
 const DomainIdSchema = z.enum(DOMAIN_IDS as [DomainId, ...DomainId[]]);
+// "owner"/"staff" filter which audience-tagged lessons show (plus anything tagged "both");
+// omitting the filter shows everything, same as today.
+const AudienceFilterSchema = z.enum(["owner", "staff"]);
 
 const GetLessonsSchema = z.object({
   domainId: DomainIdSchema.optional(),
   tier: TierSchema.optional(),
+  audience: AudienceFilterSchema.optional(),
 });
+
+// Extracted so vitest integration tests can call it directly with a real PrismaClient, same
+// pattern as getConsentedSmes/buildSmeDashboard/pickLessonForDomain elsewhere in this codebase.
+export function queryLessons(
+  db: PrismaClient,
+  filters: { domainId?: DomainId; tier?: "A" | "B" | "C"; audience?: "owner" | "staff" },
+) {
+  return db.lesson.findMany({
+    where: {
+      domainId: filters.domainId,
+      tier: filters.tier,
+      audience: filters.audience ? { in: [filters.audience, "both"] } : undefined,
+    },
+    include: { domain: true },
+    orderBy: [{ domainId: "asc" }, { sortOrder: "asc" }],
+  });
+}
 
 export const getLessons = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => GetLessonsSchema.parse(d))
   .handler(async ({ data }) => {
     const { db } = await import("@/lib/db");
-    const lessons = await db.lesson.findMany({
-      where: { domainId: data.domainId, tier: data.tier },
-      include: { domain: true },
-      orderBy: [{ domainId: "asc" }, { sortOrder: "asc" }],
-    });
+    const lessons = await queryLessons(db, data);
     return { lessons };
   });
 

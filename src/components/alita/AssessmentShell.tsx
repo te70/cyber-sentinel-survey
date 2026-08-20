@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
 interface AssessmentShellProps {
@@ -12,6 +13,9 @@ interface AssessmentShellProps {
   nextDisabledHint?: string;
   busy?: boolean;
   saved?: boolean;
+  // Renders a persistent "My dashboard" link in the top bar, so someone who closes the tab
+  // mid-assessment still has a way back later — otherwise an abandoned session is unreachable.
+  smeId?: string;
   children: ReactNode;
 }
 
@@ -26,6 +30,7 @@ export function AssessmentShell({
   nextDisabledHint,
   busy = false,
   saved = false,
+  smeId,
   children,
 }: AssessmentShellProps) {
   const pct = Math.round((stepIndex / totalSteps) * 100);
@@ -43,9 +48,20 @@ export function AssessmentShell({
       <div className="fixed top-0 right-0 left-0 z-30 border-b border-border bg-card">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
           <span className="text-sm font-semibold text-foreground">{stepName}</span>
-          <span className="text-sm text-muted-foreground">
-            Step {stepIndex} of {totalSteps}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              Step {stepIndex} of {totalSteps}
+            </span>
+            {smeId && (
+              <Link
+                to="/alita/dashboard/$smeId"
+                params={{ smeId }}
+                className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                My dashboard
+              </Link>
+            )}
+          </div>
         </div>
         <div className="h-1.5 w-full bg-muted">
           <div

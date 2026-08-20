@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CLASSIFICATION_QUESTIONS, type Tier } from "@/lib/alita/classification";
 import { createAssessment, createSme, overrideSmeTier } from "@/lib/alita/alita.functions";
+import { recordConsent } from "@/lib/alita/consent.functions";
+import { PRIVACY_NOTICE_TEXT, CONSENT_STATEMENT_TEXT } from "@/lib/alita/consent-content";
 
 export const Route = createFileRoute("/alita/start")({
   component: StartScreen,
@@ -26,9 +28,16 @@ const TIER_BLURBS: Record<Tier, string> = {
 };
 
 type Answers = Record<"q1" | "q2" | "q3" | "q4" | "q5", Tier | undefined>;
+type Phase = "consent" | "profile" | "tierConfirm";
 
 function StartScreen() {
   const navigate = useNavigate();
+  const [phase, setPhase] = useState<Phase>("consent");
+
+  // Consent phase — two separate decisions, not a bundled "I agree".
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [researchAccepted, setResearchAccepted] = useState(false);
+
   const [businessName, setBusinessName] = useState("");
   const [answers, setAnswers] = useState<Answers>({
     q1: undefined,
@@ -37,7 +46,6 @@ function StartScreen() {
     q4: undefined,
     q5: undefined,
   });
-  const [consented, setConsented] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +53,7 @@ function StartScreen() {
   const [chosenTier, setChosenTier] = useState<Tier | null>(null);
 
   const allAnswered = Object.values(answers).every((v) => v !== undefined);
-  const canSubmitProfile = businessName.trim().length > 0 && allAnswered && consented;
+  const canSubmitProfile = businessName.trim().length > 0 && allAnswered;
 
   async function handleSeeYourTier() {
     if (!canSubmitProfile) return;
@@ -62,8 +70,12 @@ function StartScreen() {
           q5Answer: answers.q5!,
         },
       });
+      await recordConsent({
+        data: { smeId: created.id, privacyAccepted: true, researchAccepted: true },
+      });
       setSme({ id: created.id, tierSuggested: created.tierSuggested });
       setChosenTier(created.tierSuggested);
+      setPhase("tierConfirm");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -89,7 +101,67 @@ function StartScreen() {
     }
   }
 
-  if (sme && chosenTier) {
+  if (phase === "consent") {
+    return (
+      <div className="min-h-screen bg-background px-5 py-10">
+        <div className="mx-auto max-w-lg">
+          <h1 className="text-2xl font-bold text-foreground">Before we start</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Two things worth reading — they cover different questions, so they're separate.
+          </p>
+
+          <Card className="mt-6 p-4">
+            <h2 className="font-semibold text-foreground">Privacy notice</h2>
+            <p className="mt-1 text-xs text-muted-foreground">How Alita handles your data.</p>
+            <div className="mt-3 max-h-56 overflow-y-auto whitespace-pre-line rounded-lg bg-secondary/30 p-3 text-xs text-foreground">
+              {PRIVACY_NOTICE_TEXT}
+            </div>
+            <label className="mt-3 flex cursor-pointer items-start gap-2.5">
+              <Checkbox
+                checked={privacyAccepted}
+                onCheckedChange={(v) => setPrivacyAccepted(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm text-foreground">
+                I've read the privacy notice and understand how my data is handled.
+              </span>
+            </label>
+          </Card>
+
+          <Card className="mt-4 p-4">
+            <h2 className="font-semibold text-foreground">Research participation consent</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Whether you agree to take part in the academic study.
+            </p>
+            <div className="mt-3 max-h-56 overflow-y-auto whitespace-pre-line rounded-lg bg-secondary/30 p-3 text-xs text-foreground">
+              {CONSENT_STATEMENT_TEXT}
+            </div>
+            <label className="mt-3 flex cursor-pointer items-start gap-2.5">
+              <Checkbox
+                checked={researchAccepted}
+                onCheckedChange={(v) => setResearchAccepted(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm text-foreground">
+                I voluntarily consent to take part in this research study.
+              </span>
+            </label>
+          </Card>
+
+          <Button
+            className="mt-6 w-full"
+            size="lg"
+            onClick={() => setPhase("profile")}
+            disabled={!privacyAccepted || !researchAccepted}
+          >
+            Continue
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "tierConfirm" && sme && chosenTier) {
     return (
       <div className="min-h-screen bg-background px-5 py-10">
         <div className="mx-auto max-w-lg">
@@ -183,21 +255,6 @@ function StartScreen() {
             </Card>
           ))}
         </div>
-
-        <Card className="mt-8 p-4">
-          <label className="flex cursor-pointer items-start gap-2.5">
-            <Checkbox
-              checked={consented}
-              onCheckedChange={(v) => setConsented(v === true)}
-              className="mt-0.5"
-            />
-            <span className="text-sm text-muted-foreground">
-              I understand Alita stores my business's answers to generate this assessment, and that
-              this is a USIU-A research tool grounded in NIST CSF and Kenya's Data Protection Act,
-              2019.
-            </span>
-          </label>
-        </Card>
 
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 

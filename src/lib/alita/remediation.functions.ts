@@ -1,10 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { PrismaClient } from "@prisma/client";
 import { DOMAIN_IDS, type DomainId } from "./domains";
 import { buildRemediationChain, buildRemediationPlan } from "./remediation";
 import { matchTools } from "./tool-matching";
 
 const DomainIdSchema = z.enum(DOMAIN_IDS as [DomainId, ...DomainId[]]);
+
+// Picks the "Learn more" lesson for a domain/tier — highest priority first (see the `priority`
+// column on Lesson), falling back to sortOrder. Extracted so vitest integration tests can call it
+// directly, same pattern as getConsentedSmes/buildSmeDashboard elsewhere in this codebase.
+export function pickLessonForDomain(db: PrismaClient, domainId: DomainId, tier: "A" | "B" | "C") {
+  return db.lesson.findFirst({
+    where: { domainId, tier },
+    orderBy: [{ priority: "desc" }, { sortOrder: "asc" }],
+  });
+}
 
 const GetRemediationReportSchema = z.object({ assessmentId: z.string().uuid() });
 
@@ -60,10 +71,7 @@ export const getRemediationReport = createServerFn({ method: "GET" })
               }),
             ),
           ),
-          db.lesson.findFirst({
-            where: { domainId: entry.domainId, tier: assessment.sme.tier },
-            orderBy: { sortOrder: "asc" },
-          }),
+          pickLessonForDomain(db, entry.domainId, assessment.sme.tier),
         ]);
 
         return {

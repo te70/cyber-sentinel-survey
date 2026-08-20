@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { CLASSIFICATION_QUESTIONS } from "../src/lib/alita/classification";
 import { DOMAINS, type DomainId } from "../src/lib/alita/domains";
-import { waitForHydration } from "./helpers";
+import { answerDomainToLevel, completeIntake, waitForHydration } from "./helpers";
 
 // Complete a lesson's quiz and confirm it shows as completed on a repeat Training Hub visit —
 // supports the "ongoing check, not a one-time report" framing (T4/T18).
@@ -10,28 +9,14 @@ import { waitForHydration } from "./helpers";
 const LOW_LEVELS: Record<DomainId, number> = { D1: 1, D2: 1, D3: 1, D4: 1, D5: 1, D6: 1 };
 
 test("completing a lesson quiz marks it done on the Training Hub", async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(150_000);
   await page.goto("/alita/start");
   await waitForHydration(page);
-  await page.getByLabel("Business name").fill("Training Completion Test Co");
-
-  for (const q of CLASSIFICATION_QUESTIONS) {
-    await page.locator(`#${q.id}-A`).click();
-  }
-  await page.getByRole("checkbox").click();
-  await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Start my assessment" }).click();
-  await page.waitForURL(/\/alita\/assessment\//);
+  await completeIntake(page, { businessName: "Training Completion Test Co" });
 
   for (let i = 0; i < DOMAINS.length; i++) {
-    const level = LOW_LEVELS[DOMAINS[i].id];
-    const option = page.getByTestId(`level-option-${level}`);
-    await option.waitFor({ state: "visible" });
-    await option.click();
-    const isLast = i === DOMAINS.length - 1;
-    const nextButton = page.getByRole("button", { name: isLast ? "Finish" : "Next" });
-    await expect(nextButton).toBeEnabled();
-    await nextButton.click();
+    const isLastDomain = i === DOMAINS.length - 1;
+    await answerDomainToLevel(page, LOW_LEVELS[DOMAINS[i].id], isLastDomain);
   }
 
   await page.waitForURL(/\/alita\/results\//);

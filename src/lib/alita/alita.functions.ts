@@ -86,7 +86,7 @@ export const getAssessment = createServerFn({ method: "GET" })
     const { db } = await import("@/lib/db");
     const assessment = await db.assessment.findUniqueOrThrow({
       where: { id: data.assessmentId },
-      include: { sme: true, scores: true },
+      include: { sme: true, scores: true, itemResponses: true },
     });
     return { assessment };
   });

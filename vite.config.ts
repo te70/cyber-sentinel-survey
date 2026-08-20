@@ -13,4 +13,13 @@ export default defineConfig({
     }),
     react(),
   ],
+  // playwright/playwright-core are server-only (used from pdf.functions.ts to render the PDF
+  // export) and pull in Node-native CJS internals (chromium-bidi) that break Vite's client-side
+  // dependency pre-bundling scan if it tries to touch them.
+  optimizeDeps: {
+    exclude: ["playwright", "playwright-core"],
+  },
+  ssr: {
+    external: ["playwright", "playwright-core"],
+  },
 });

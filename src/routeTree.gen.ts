@@ -16,9 +16,14 @@ import { Route as ToolsTaxRouteImport } from './routes/tools/tax'
 import { Route as ToolsInvoiceRouteImport } from './routes/tools/invoice'
 import { Route as ToolsContractsRouteImport } from './routes/tools/contracts'
 import { Route as ToolsComplianceRouteImport } from './routes/tools/compliance'
+import { Route as ResearchLoginRouteImport } from './routes/research/login'
+import { Route as ResearchExportRouteImport } from './routes/research/export'
+import { Route as ResearchDashboardRouteImport } from './routes/research/dashboard'
 import { Route as AlitaStartRouteImport } from './routes/alita/start'
+import { Route as AlitaSettingsSmeIdRouteImport } from './routes/alita/settings.$smeId'
 import { Route as AlitaResultsAssessmentIdRouteImport } from './routes/alita/results.$assessmentId'
 import { Route as AlitaGapsSmeIdRouteImport } from './routes/alita/gaps.$smeId'
+import { Route as AlitaDashboardSmeIdRouteImport } from './routes/alita/dashboard.$smeId'
 import { Route as AlitaAssessmentAssessmentIdRouteImport } from './routes/alita/assessment.$assessmentId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -56,9 +61,29 @@ const ToolsComplianceRoute = ToolsComplianceRouteImport.update({
   path: '/tools/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchLoginRoute = ResearchLoginRouteImport.update({
+  id: '/research/login',
+  path: '/research/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchExportRoute = ResearchExportRouteImport.update({
+  id: '/research/export',
+  path: '/research/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchDashboardRoute = ResearchDashboardRouteImport.update({
+  id: '/research/dashboard',
+  path: '/research/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlitaStartRoute = AlitaStartRouteImport.update({
   id: '/alita/start',
   path: '/alita/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlitaSettingsSmeIdRoute = AlitaSettingsSmeIdRouteImport.update({
+  id: '/alita/settings/$smeId',
+  path: '/alita/settings/$smeId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlitaResultsAssessmentIdRoute =
@@ -72,6 +97,11 @@ const AlitaGapsSmeIdRoute = AlitaGapsSmeIdRouteImport.update({
   path: '/alita/gaps/$smeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlitaDashboardSmeIdRoute = AlitaDashboardSmeIdRouteImport.update({
+  id: '/alita/dashboard/$smeId',
+  path: '/alita/dashboard/$smeId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlitaAssessmentAssessmentIdRoute =
   AlitaAssessmentAssessmentIdRouteImport.update({
     id: '/alita/assessment/$assessmentId',
@@ -82,6 +112,9 @@ const AlitaAssessmentAssessmentIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alita/start': typeof AlitaStartRoute
+  '/research/dashboard': typeof ResearchDashboardRoute
+  '/research/export': typeof ResearchExportRoute
+  '/research/login': typeof ResearchLoginRoute
   '/tools/compliance': typeof ToolsComplianceRoute
   '/tools/contracts': typeof ToolsContractsRoute
   '/tools/invoice': typeof ToolsInvoiceRoute
@@ -89,12 +122,17 @@ export interface FileRoutesByFullPath {
   '/training/$lessonId': typeof TrainingLessonIdRoute
   '/training/': typeof TrainingIndexRoute
   '/alita/assessment/$assessmentId': typeof AlitaAssessmentAssessmentIdRoute
+  '/alita/dashboard/$smeId': typeof AlitaDashboardSmeIdRoute
   '/alita/gaps/$smeId': typeof AlitaGapsSmeIdRoute
   '/alita/results/$assessmentId': typeof AlitaResultsAssessmentIdRoute
+  '/alita/settings/$smeId': typeof AlitaSettingsSmeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alita/start': typeof AlitaStartRoute
+  '/research/dashboard': typeof ResearchDashboardRoute
+  '/research/export': typeof ResearchExportRoute
+  '/research/login': typeof ResearchLoginRoute
   '/tools/compliance': typeof ToolsComplianceRoute
   '/tools/contracts': typeof ToolsContractsRoute
   '/tools/invoice': typeof ToolsInvoiceRoute
@@ -102,13 +140,18 @@ export interface FileRoutesByTo {
   '/training/$lessonId': typeof TrainingLessonIdRoute
   '/training': typeof TrainingIndexRoute
   '/alita/assessment/$assessmentId': typeof AlitaAssessmentAssessmentIdRoute
+  '/alita/dashboard/$smeId': typeof AlitaDashboardSmeIdRoute
   '/alita/gaps/$smeId': typeof AlitaGapsSmeIdRoute
   '/alita/results/$assessmentId': typeof AlitaResultsAssessmentIdRoute
+  '/alita/settings/$smeId': typeof AlitaSettingsSmeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alita/start': typeof AlitaStartRoute
+  '/research/dashboard': typeof ResearchDashboardRoute
+  '/research/export': typeof ResearchExportRoute
+  '/research/login': typeof ResearchLoginRoute
   '/tools/compliance': typeof ToolsComplianceRoute
   '/tools/contracts': typeof ToolsContractsRoute
   '/tools/invoice': typeof ToolsInvoiceRoute
@@ -116,14 +159,19 @@ export interface FileRoutesById {
   '/training/$lessonId': typeof TrainingLessonIdRoute
   '/training/': typeof TrainingIndexRoute
   '/alita/assessment/$assessmentId': typeof AlitaAssessmentAssessmentIdRoute
+  '/alita/dashboard/$smeId': typeof AlitaDashboardSmeIdRoute
   '/alita/gaps/$smeId': typeof AlitaGapsSmeIdRoute
   '/alita/results/$assessmentId': typeof AlitaResultsAssessmentIdRoute
+  '/alita/settings/$smeId': typeof AlitaSettingsSmeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/alita/start'
+    | '/research/dashboard'
+    | '/research/export'
+    | '/research/login'
     | '/tools/compliance'
     | '/tools/contracts'
     | '/tools/invoice'
@@ -131,12 +179,17 @@ export interface FileRouteTypes {
     | '/training/$lessonId'
     | '/training/'
     | '/alita/assessment/$assessmentId'
+    | '/alita/dashboard/$smeId'
     | '/alita/gaps/$smeId'
     | '/alita/results/$assessmentId'
+    | '/alita/settings/$smeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/alita/start'
+    | '/research/dashboard'
+    | '/research/export'
+    | '/research/login'
     | '/tools/compliance'
     | '/tools/contracts'
     | '/tools/invoice'
@@ -144,12 +197,17 @@ export interface FileRouteTypes {
     | '/training/$lessonId'
     | '/training'
     | '/alita/assessment/$assessmentId'
+    | '/alita/dashboard/$smeId'
     | '/alita/gaps/$smeId'
     | '/alita/results/$assessmentId'
+    | '/alita/settings/$smeId'
   id:
     | '__root__'
     | '/'
     | '/alita/start'
+    | '/research/dashboard'
+    | '/research/export'
+    | '/research/login'
     | '/tools/compliance'
     | '/tools/contracts'
     | '/tools/invoice'
@@ -157,13 +215,18 @@ export interface FileRouteTypes {
     | '/training/$lessonId'
     | '/training/'
     | '/alita/assessment/$assessmentId'
+    | '/alita/dashboard/$smeId'
     | '/alita/gaps/$smeId'
     | '/alita/results/$assessmentId'
+    | '/alita/settings/$smeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlitaStartRoute: typeof AlitaStartRoute
+  ResearchDashboardRoute: typeof ResearchDashboardRoute
+  ResearchExportRoute: typeof ResearchExportRoute
+  ResearchLoginRoute: typeof ResearchLoginRoute
   ToolsComplianceRoute: typeof ToolsComplianceRoute
   ToolsContractsRoute: typeof ToolsContractsRoute
   ToolsInvoiceRoute: typeof ToolsInvoiceRoute
@@ -171,8 +234,10 @@ export interface RootRouteChildren {
   TrainingLessonIdRoute: typeof TrainingLessonIdRoute
   TrainingIndexRoute: typeof TrainingIndexRoute
   AlitaAssessmentAssessmentIdRoute: typeof AlitaAssessmentAssessmentIdRoute
+  AlitaDashboardSmeIdRoute: typeof AlitaDashboardSmeIdRoute
   AlitaGapsSmeIdRoute: typeof AlitaGapsSmeIdRoute
   AlitaResultsAssessmentIdRoute: typeof AlitaResultsAssessmentIdRoute
+  AlitaSettingsSmeIdRoute: typeof AlitaSettingsSmeIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -226,11 +291,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research/login': {
+      id: '/research/login'
+      path: '/research/login'
+      fullPath: '/research/login'
+      preLoaderRoute: typeof ResearchLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/export': {
+      id: '/research/export'
+      path: '/research/export'
+      fullPath: '/research/export'
+      preLoaderRoute: typeof ResearchExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research/dashboard': {
+      id: '/research/dashboard'
+      path: '/research/dashboard'
+      fullPath: '/research/dashboard'
+      preLoaderRoute: typeof ResearchDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/alita/start': {
       id: '/alita/start'
       path: '/alita/start'
       fullPath: '/alita/start'
       preLoaderRoute: typeof AlitaStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alita/settings/$smeId': {
+      id: '/alita/settings/$smeId'
+      path: '/alita/settings/$smeId'
+      fullPath: '/alita/settings/$smeId'
+      preLoaderRoute: typeof AlitaSettingsSmeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/alita/results/$assessmentId': {
@@ -247,6 +340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlitaGapsSmeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alita/dashboard/$smeId': {
+      id: '/alita/dashboard/$smeId'
+      path: '/alita/dashboard/$smeId'
+      fullPath: '/alita/dashboard/$smeId'
+      preLoaderRoute: typeof AlitaDashboardSmeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/alita/assessment/$assessmentId': {
       id: '/alita/assessment/$assessmentId'
       path: '/alita/assessment/$assessmentId'
@@ -260,6 +360,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlitaStartRoute: AlitaStartRoute,
+  ResearchDashboardRoute: ResearchDashboardRoute,
+  ResearchExportRoute: ResearchExportRoute,
+  ResearchLoginRoute: ResearchLoginRoute,
   ToolsComplianceRoute: ToolsComplianceRoute,
   ToolsContractsRoute: ToolsContractsRoute,
   ToolsInvoiceRoute: ToolsInvoiceRoute,
@@ -267,8 +370,10 @@ const rootRouteChildren: RootRouteChildren = {
   TrainingLessonIdRoute: TrainingLessonIdRoute,
   TrainingIndexRoute: TrainingIndexRoute,
   AlitaAssessmentAssessmentIdRoute: AlitaAssessmentAssessmentIdRoute,
+  AlitaDashboardSmeIdRoute: AlitaDashboardSmeIdRoute,
   AlitaGapsSmeIdRoute: AlitaGapsSmeIdRoute,
   AlitaResultsAssessmentIdRoute: AlitaResultsAssessmentIdRoute,
+  AlitaSettingsSmeIdRoute: AlitaSettingsSmeIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,6 +5,8 @@ import { DESCRIPTORS } from "./seed/descriptors.data";
 import { REMEDIATION_GUIDANCE } from "./seed/remediation.data";
 import { TOOLS } from "./seed/tools.data";
 import { LESSONS } from "./seed/lessons.data";
+import { ASSESSMENT_ITEMS } from "./seed/assessment-items.data";
+import { hashPassword } from "../src/lib/researcher-password.server";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is not set in environment variables.");
@@ -30,6 +32,17 @@ async function main() {
       },
     });
   }
+  // A pseudo-domain for lessons that don't map onto one of the six scored domains (Phase 5's
+  // talent-turnover/solo-operator content — see the comment in lessons.data.ts). Deliberately
+  // NOT part of DOMAINS/DOMAIN_IDS in src/lib/alita/domains.ts, so it never participates in
+  // assessment scoring, item batteries, or descriptors — it exists purely to satisfy Lesson's
+  // required domainId FK without a nullable-column migration.
+  await db.domain.upsert({
+    where: { id: "GEN" },
+    create: { id: "GEN", label: "General", nistFunction: "—", weight: 0, sortOrder: 99 },
+    update: { label: "General", nistFunction: "—", weight: 0, sortOrder: 99 },
+  });
+
   console.log(`Seeded ${DOMAINS.length} domains.`);
 
   for (const row of DESCRIPTORS) {
@@ -91,6 +104,38 @@ async function main() {
     }
   }
   console.log(`Seeded ${LESSONS.length} lessons with quiz questions.`);
+
+  for (const item of ASSESSMENT_ITEMS) {
+    await db.assessmentItem.upsert({
+      where: {
+        domainId_tier_level_order: {
+          domainId: item.domainId,
+          tier: item.tier,
+          level: item.level,
+          order: item.order,
+        },
+      },
+      create: { ...item },
+      update: { ...item },
+    });
+  }
+  console.log(`Seeded ${ASSESSMENT_ITEMS.length} assessment items.`);
+
+  const researcherUsername = process.env.RESEARCHER_USERNAME;
+  const researcherPassword = process.env.RESEARCHER_INITIAL_PASSWORD;
+  if (researcherUsername && researcherPassword) {
+    await db.researcher.upsert({
+      where: { username: researcherUsername },
+      create: { username: researcherUsername, passwordHash: hashPassword(researcherPassword) },
+      // Don't overwrite an existing password on every reseed — only create if missing.
+      update: {},
+    });
+    console.log(`Ensured researcher account "${researcherUsername}" exists.`);
+  } else {
+    console.log(
+      "RESEARCHER_USERNAME / RESEARCHER_INITIAL_PASSWORD not set — skipped researcher account seeding.",
+    );
+  }
 }
 
 main()
