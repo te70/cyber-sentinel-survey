@@ -31,7 +31,14 @@ RUN npx playwright install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
+# prisma.config.ts lives at the project root (not inside ./prisma) and is what wires
+# process.env.DATABASE_URL into Prisma's config at all — without it, `prisma db push`/`generate`
+# fail with "datasource.url property is required" regardless of what's actually in the env.
+COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY package.json ./
 
-# Railway injects PORT; srvx (see the "start" script) reads it automatically.
+# Railway injects PORT at runtime; srvx (see the "start" script) reads it automatically. This
+# EXPOSE is a hint for Railway's port auto-detection on Dockerfile-based deploys — it doesn't
+# override the actual runtime port, which is still whatever $PORT Railway assigns.
+EXPOSE 3000
 CMD ["npm", "start"]
